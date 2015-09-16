@@ -1,7 +1,7 @@
 package jamulator
 
 import (
-	"github.com/axw/gollvm/llvm"
+	"llvm.org/svn/llvm-project/llvm/branches/release_36/bindings/go/llvm.svn"
 	"fmt"
 )
 

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./jamulator"
+	"github.com/andrewrk/jamulator/jamulator"
 	"flag"
 	"fmt"
 	"os"

@@ -4,7 +4,7 @@ package jamulator
 
 import (
 	"fmt"
-	"github.com/axw/gollvm/llvm"
+	"llvm.org/svn/llvm-project/llvm/branches/release_36/bindings/go/llvm.svn"
 	"os"
 )
 
@@ -2011,7 +2011,9 @@ func (p *Program) CompileToFile(file *os.File, flags CompileFlags) (*Compilation
 		return c, nil
 	}
 
-	engine, err := llvm.NewJITCompiler(c.mod, 3)
+	options := llvm.NewMCJITCompilerOptions()
+	options.SetMCJITOptimizationLevel(3)
+	engine, err := llvm.NewMCJITCompiler(c.mod, options)
 	if err != nil {
 		c.Errors = append(c.Errors, err.Error())
 		return c, nil
