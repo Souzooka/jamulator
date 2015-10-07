@@ -261,6 +261,184 @@ func (d *Disassembly) detectJumpTable(addr int) bool {
 	}
 	return false
 }
+func (r *Rom) MarkAsInstruction(addr int) error {
+	opCode := r.Read(addr)
+	i := new(Instruction)
+	opCodeInfo := opCodeDataMap[opCode]
+	i.OpName = opCodeInfo.opName
+	i.OpCode = opCode
+	i.Offset = addr
+	switch opCodeInfo.addrMode {
+	case nilAddr:
+		return errors.New("cannot disassemble as instruction: bad op code")
+	case absAddr:
+		// convert data statements into instruction statement
+		w := r.ReadWord(addr + 1)
+		i.Value = int(w)
+		i.Payload = []byte{opCode, 0, 0}
+		binary.LittleEndian.PutUint16(i.Payload[1:], w)
+		// var error err;
+		// i.LabelName, err = d.prog.getLabelAt(i.Value, "")
+		// if err == nil {
+		// 	i.Type = DirectWithLabelInstruction
+		// } else {
+		// 	i.Type = DirectInstruction
+		// }
+		// elem.Value = i
+
+		// d.removeElemAt(addr + 1)
+		// d.removeElemAt(addr + 2)
+
+		// switch opCode {
+		// case 0x4c: // jmp
+		// 	d.markAsInstruction(i.Value)
+		// case 0x20: // jsr
+		// 	d.markAsInstruction(i.Value)
+		// 	if d.isJumpTable(i.Value) {
+		// 		// mark this and remember to come back later
+		// 		d.dynJumps = append(d.dynJumps, addr+3)
+		// 	} else {
+		// 		d.markAsInstruction(addr + 3)
+		// 	}
+		// default:
+		// 	d.markAsInstruction(addr + 3)
+		// }
+	case absXAddr, absYAddr:
+		w := r.ReadWord(addr + 1)
+		if opCodeInfo.addrMode == absYAddr {
+			i.RegisterName = "Y"
+		} else {
+			i.RegisterName = "X"
+		}
+		i.Value = int(w)
+		i.Payload = []byte{opCode, 0, 0}
+		binary.LittleEndian.PutUint16(i.Payload[1:], w)
+		// i.LabelName, err = d.prog.getLabelAt(i.Value, "")
+		// if err == nil {
+		// 	i.Type = DirectWithLabelIndexedInstruction
+		// } else {
+		// 	i.Type = DirectIndexedInstruction
+		// }
+		// elem.Value = i
+
+		// d.removeElemAt(addr + 1)
+		// d.removeElemAt(addr + 2)
+
+		// // next thing is definitely an instruction
+		// d.markAsInstruction(addr + 3)
+	case immedAddr:
+		v := r.Read(addr + 1)
+		i.Type = ImmediateInstruction
+		i.Value = int(v)
+		i.Payload = []byte{opCode, v}
+		// elem.Value = i
+
+		// d.removeElemAt(addr + 1)
+
+		// // next thing is definitely an instruction
+		// d.markAsInstruction(addr + 2)
+	case impliedAddr:
+		i.Type = ImpliedInstruction
+		i.Payload = []byte{opCode}
+		//elem.Value = i
+
+		switch opCode {
+		case 0x40: // RTI
+		case 0x60: // RTS
+		case 0x00: // BRK
+		default:
+			// next thing is definitely an instruction
+			//d.markAsInstruction(addr + 1)
+		}
+	case indirectAddr:
+		// note: only JMP uses this
+		w := r.ReadWord(addr + 1)
+		i.Type = IndirectInstruction
+		i.Payload = []byte{opCode, 0, 0}
+		i.Value = int(w)
+		binary.LittleEndian.PutUint16(i.Payload[1:], w)
+		// elem.Value = i
+
+		// d.removeElemAt(addr + 1)
+		// d.removeElemAt(addr + 2)
+
+		// if opCode == 0x6c {
+		// 	// JMP
+		// } else {
+		// 	// next thing is definitely an instruction
+		// 	d.markAsInstruction(addr + 3)
+		// }
+	case xIndexIndirectAddr:
+		v := r.Read(addr + 1)
+		i.Type = IndirectXInstruction
+		i.Payload = []byte{opCode, v}
+		i.Value = int(v)
+		// elem.Value = i
+
+		// d.removeElemAt(addr + 1)
+
+		// // next thing is definitely an instruction
+		// d.markAsInstruction(addr + 2)
+	case indirectYIndexAddr:
+		v := r.Read(addr + 1)
+		i.Type = IndirectYInstruction
+		i.Value = int(v)
+		i.Payload = []byte{opCode, v}
+		// elem.Value = i
+
+		// d.removeElemAt(addr + 1)
+
+		// // next thing is definitely an instruction
+		// d.markAsInstruction(addr + 2)
+	case relativeAddr:
+		v := r.Read(addr + 1)
+		i.Type = DirectWithLabelInstruction
+		i.Value = addr + 2 + int(int8(v))
+		i.Payload = []byte{opCode, v}
+		// i.LabelName, err = d.prog.getLabelAt(i.Value, "")
+		// if err != nil {
+		// 	panic(err)
+		// }
+		// elem.Value = i
+
+		// d.removeElemAt(addr + 1)
+
+		// // mark both targets of the branch as instructions
+		// d.markAsInstruction(addr + 2)
+		// d.markAsInstruction(i.Value)
+	case zeroPageAddr:
+		v := r.Read(addr + 1)
+		i.Type = DirectInstruction
+		i.Payload = []byte{opCode, v}
+		i.Value = int(v)
+		// elem.Value = i
+
+		// d.removeElemAt(addr + 1)
+
+		// // next thing is definitely an instruction
+		// d.markAsInstruction(addr + 2)
+	case zeroXIndexAddr, zeroYIndexAddr:
+		if opCodeInfo.addrMode == zeroYIndexAddr {
+			i.RegisterName = "Y"
+		} else {
+			i.RegisterName = "X"
+		}
+		v := r.Read(addr + 1)
+		i.Type = DirectIndexedInstruction
+		i.Payload = []byte{opCode, v}
+		i.Value = int(v)
+		i.RegisterName = i.RegisterName
+
+		// elem.Value = i
+
+		// d.removeElemAt(addr + 1)
+
+		// // next thing is definitely an instruction
+		// d.markAsInstruction(addr + 2)
+	}
+	fmt.Printf("got an instruction %v",i)
+	return nil
+}
 
 func (d *Disassembly) markAsInstruction(addr int) error {
 	if addr < 0x8000 {

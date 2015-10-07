@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 	"path"
+	"fmt"
+	"encoding/binary"
 )
 
 const (
@@ -57,6 +59,7 @@ type Rom struct {
 func Load(ioreader io.Reader) (*Rom, error) {
 	reader := bufio.NewReader(ioreader)
 	r := new(Rom)
+	fmt.Printf("read it")
 
 	// read the header
 	buf := make([]byte, 16)
@@ -117,6 +120,7 @@ func Load(ioreader io.Reader) (*Rom, error) {
 	}
 
 	r.PrgRom = make([][]byte, prgBankCount)
+	fmt.Printf("read at least %v",prgBankCount)
 	for i := 0; i < prgBankCount; i++ {
 		bank := make([]byte, 0x4000)
 		_, err := io.ReadAtLeast(reader, bank, len(bank))
@@ -156,6 +160,20 @@ func LoadFile(filename string) (*Rom, error) {
 	r.Filename = path.Base(filename)
 
 	return r, nil
+}
+
+//dont support mappers, assume 2 banks
+func (r *Rom) Read(a int) byte{
+	if a >= 0xC000 {
+		return r.PrgRom[1][a&0x3FFF]
+	}
+
+	return r.PrgRom[0][a&0x3FFF]
+}
+
+//dont support mappers, assume 2 banks
+func (r *Rom) ReadWord(a int) uint16{
+	return binary.LittleEndian.Uint16([]byte{r.Read(a), r.Read(a+1)})
 }
 
 func (r *Rom) Save(writer io.Writer) error {

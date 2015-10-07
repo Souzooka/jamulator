@@ -1561,6 +1561,9 @@ func (c *Compilation) createReadChrFn(chrRom [][]byte) {
 			chrDataValues = append(chrDataValues, llvm.ConstInt(int8type, uint64(b), false))
 		}
 	}
+	fmt.Printf("the length is %v", len(chrDataValues))
+	fmt.Printf("the type is %v",llvm.ArrayType(llvm.Int8Type(), dataLen))
+	fmt.Printf("the type is %v",chrDataValues[0].Type())
 	chrDataConst := llvm.ConstArray(llvm.ArrayType(llvm.Int8Type(), dataLen), chrDataValues)
 	chrDataGlobal := llvm.AddGlobal(c.mod, chrDataConst.Type(), "rom_chr_data")
 	chrDataGlobal.SetLinkage(llvm.PrivateLinkage)

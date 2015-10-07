@@ -1,5 +1,5 @@
 build: jamulator/y.go jamulator/asm6502.nn.go runtime/runtime.a
-	go build -tags byollvm -o jamulate main.go
+	go build -tags byollvm -o jamulate main.go 
 
 jamulator/y.go: jamulator/asm6502.y
 	go tool yacc -o jamulator/y.go -v /dev/null jamulator/asm6502.y

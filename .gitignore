@@ -7,3 +7,6 @@
 *.o
 *.bc
 *.so
+*.DS_Store
+*.nes
+export.sh
