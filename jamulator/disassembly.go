@@ -23,6 +23,13 @@ type Disassembly struct {
 	jumpTables map[int]bool
 }
 
+type Jitter struct {
+	rom 	*Rom
+	dynJumps   []int
+	jumpTables map[int]bool
+	block 	   map[int]*Instruction
+}
+
 func (d *Disassembly) elemAsByte(elem *list.Element) (byte, error) {
 	if elem == nil {
 		return 0, errors.New("not enough bytes for byte")
@@ -101,6 +108,121 @@ func (d *Disassembly) isJumpTable(addr int) bool {
 	isJmpTable = d.detectJumpTable(addr)
 	d.jumpTables[addr] = isJmpTable
 	return isJmpTable
+}
+
+func (r *Rom) detectJumpTable(addr int) bool{
+	const (
+		expectAsl = iota
+		expectTay
+		expectPlaA
+		expectStaA
+		expectPlaB
+		expectStaB
+		expectInyC
+		expectLdaC
+		expectStaC
+		expectInYD
+		expectLdaD
+		expectStaD
+		expectJmp
+	)
+	state := expectAsl
+	var memA, memC byte
+	for opCode := r.Read(addr); ; addr++ {
+		switch state {
+		case expectAsl:
+			if opCode != 0x0a {
+				return false
+			}
+			state = expectTay
+		case expectTay:
+			if opCode != 0xa8 {
+				return false
+			}
+			state = expectPlaA
+		case expectPlaA:
+			if opCode != 0x68 {
+				return false
+			}
+			state = expectStaA
+		case expectStaA:
+			if opCode != 0x85 && opCode != 0x8d {
+				return false
+			}
+			addr += 1
+			memA = r.Read(addr)
+			state = expectPlaB
+		case expectPlaB:
+			if opCode != 0x68 {
+				return false
+			}
+			state = expectStaB
+		case expectStaB:
+			if opCode != 0x85 && opCode != 0x8d {
+				return false
+			}
+			addr += 1
+			if r.Read(addr)!= memA+1 {
+				return false
+			}
+			state = expectInyC
+		case expectInyC:
+			if opCode != 0xc8 {
+				return false
+			}
+			state = expectLdaC
+		case expectLdaC:
+			if opCode  != 0xb1 {
+				return false
+			}
+			addr += 1
+			if r.Read(addr)!= memA {
+				return false
+			}
+			state = expectStaC
+		case expectStaC:
+			if opCode != 0x85 && opCode != 0x8d {
+				return false
+			}
+			addr += 1
+			memC = r.Read(addr)
+			state = expectInYD
+		case expectInYD:
+			if opCode != 0xc8 {
+				return false
+			}
+			state = expectLdaD
+		case expectLdaD:
+			if opCode != 0xb1 {
+				return false
+			}
+			addr += 1
+			if r.Read(addr) != memA {
+				return false
+			}
+			state = expectStaD
+		case expectStaD:
+			if opCode != 0x85 && opCode != 0x8d {
+				return false
+			}
+			addr += 1
+			if r.Read(addr) != memC+1 {
+				return false
+			}
+			state = expectJmp
+		case expectJmp:
+			if opCode != 0x6c {
+				return false
+			}
+			addr += 1
+			if r.Read(addr) != memC {
+				return false
+			}
+			fmt.Printf("new jump table")
+			return true
+		}
+	}
+	return false
 }
 
 func (d *Disassembly) detectJumpTable(addr int) bool {
@@ -261,8 +383,61 @@ func (d *Disassembly) detectJumpTable(addr int) bool {
 	}
 	return false
 }
-func (r *Rom) MarkAsInstruction(addr int) error {
+func (i *Instruction) String() string{
+	if len(i.Payload) > 2 {
+		return fmt.Sprintf("%X %X %2X %2X %v %X",i.Offset,i.OpCode,i.Payload[1],i.Payload[2],i.OpName,i.Value)
+	} else {
+		return fmt.Sprintf("%X %X       %v %X",i.Offset,i.OpCode,i.OpName,i.Value)
+	}
+}
+
+type stack []*Instruction
+
+func (s stack) Push(v *Instruction) stack {
+    return append(s, v)
+}
+
+func (s stack) Pop() (stack, *Instruction) {
+    // FIXME: What do we do if the stack is empty, though?
+
+    l := len(s)
+    return  s[:l-1], s[l-1]
+}
+
+func (j *Jitter) Print(){
+	var s stack
+	addr := 0x10000 - 0x4000*len(j.rom.PrgRom)
+	for i := j.block[addr]; i != nil; {
+		fmt.Printf("%v \n",i)
+		if i.OpName == "jmp" {
+			i = j.block[i.Value]
+		} else if i.OpName == "jsr" {
+			s = s.Push(i)
+			i = j.block[i.Value]
+		} else if i.OpName == "rts" {
+			s, i = s.Pop()
+			i = i.Next
+		} else {
+			i = i.Next
+		} 
+
+	}
+
+}
+
+func (j *Jitter) NewBlock(addr int) {
+	//fmt.Printf("new block: %v, items: %v \n", addr, len(j.block))
+	if _,ok := j.block[addr]; ok{
+		return
+	}else{
+		j.block[addr], _ = j.MarkAsInstruction(addr)
+	}
+}
+
+func (j *Jitter) MarkAsInstruction(addr int) (*Instruction, error) {
+	r := j.rom
 	opCode := r.Read(addr)
+	var err error;
 	i := new(Instruction)
 	opCodeInfo := opCodeDataMap[opCode]
 	i.OpName = opCodeInfo.opName
@@ -270,13 +445,32 @@ func (r *Rom) MarkAsInstruction(addr int) error {
 	i.Offset = addr
 	switch opCodeInfo.addrMode {
 	case nilAddr:
-		return errors.New("cannot disassemble as instruction: bad op code")
+		return nil, errors.New("cannot disassemble as instruction: bad op code")
 	case absAddr:
 		// convert data statements into instruction statement
 		w := r.ReadWord(addr + 1)
 		i.Value = int(w)
 		i.Payload = []byte{opCode, 0, 0}
 		binary.LittleEndian.PutUint16(i.Payload[1:], w)
+
+		i.Type = DirectInstruction
+
+		switch opCode {
+		case 0x4c: // jmp
+			j.NewBlock(i.Value)
+		case 0x20: // jsr
+			j.NewBlock(i.Value)
+			if r.detectJumpTable(i.Value) {
+				// mark this and remember to come back later
+				j.dynJumps = append(j.dynJumps, addr+3)
+			} else {
+				i.Next, err = j.MarkAsInstruction(addr + 3)
+			}
+		default:
+			i.Next, err = j.MarkAsInstruction(addr + 3)
+		}
+
+
 		// var error err;
 		// i.LabelName, err = d.prog.getLabelAt(i.Value, "")
 		// if err == nil {
@@ -313,6 +507,10 @@ func (r *Rom) MarkAsInstruction(addr int) error {
 		i.Value = int(w)
 		i.Payload = []byte{opCode, 0, 0}
 		binary.LittleEndian.PutUint16(i.Payload[1:], w)
+
+		i.Type = DirectIndexedInstruction
+		i.Next, err = j.MarkAsInstruction(addr + 3)
+
 		// i.LabelName, err = d.prog.getLabelAt(i.Value, "")
 		// if err == nil {
 		// 	i.Type = DirectWithLabelIndexedInstruction
@@ -331,6 +529,9 @@ func (r *Rom) MarkAsInstruction(addr int) error {
 		i.Type = ImmediateInstruction
 		i.Value = int(v)
 		i.Payload = []byte{opCode, v}
+
+		i.Next, err = j.MarkAsInstruction(addr + 2)
+
 		// elem.Value = i
 
 		// d.removeElemAt(addr + 1)
@@ -347,6 +548,7 @@ func (r *Rom) MarkAsInstruction(addr int) error {
 		case 0x60: // RTS
 		case 0x00: // BRK
 		default:
+			i.Next, err = j.MarkAsInstruction(addr + 1)
 			// next thing is definitely an instruction
 			//d.markAsInstruction(addr + 1)
 		}
@@ -357,6 +559,13 @@ func (r *Rom) MarkAsInstruction(addr int) error {
 		i.Payload = []byte{opCode, 0, 0}
 		i.Value = int(w)
 		binary.LittleEndian.PutUint16(i.Payload[1:], w)
+		if opCode == 0x6c {
+			// JMP
+		} else {
+			// next thing is definitely an instruction
+			i.Next, err = j.MarkAsInstruction(addr + 3)
+		}
+
 		// elem.Value = i
 
 		// d.removeElemAt(addr + 1)
@@ -373,6 +582,7 @@ func (r *Rom) MarkAsInstruction(addr int) error {
 		i.Type = IndirectXInstruction
 		i.Payload = []byte{opCode, v}
 		i.Value = int(v)
+		i.Next, err = j.MarkAsInstruction(addr + 2)
 		// elem.Value = i
 
 		// d.removeElemAt(addr + 1)
@@ -384,6 +594,7 @@ func (r *Rom) MarkAsInstruction(addr int) error {
 		i.Type = IndirectYInstruction
 		i.Value = int(v)
 		i.Payload = []byte{opCode, v}
+		i.Next, err = j.MarkAsInstruction(addr + 2)
 		// elem.Value = i
 
 		// d.removeElemAt(addr + 1)
@@ -395,6 +606,12 @@ func (r *Rom) MarkAsInstruction(addr int) error {
 		i.Type = DirectWithLabelInstruction
 		i.Value = addr + 2 + int(int8(v))
 		i.Payload = []byte{opCode, v}
+		
+		//DEAL WITH BRANCH
+		i.Next, err = j.MarkAsInstruction(addr + 2)
+		j.NewBlock(i.Value)
+
+
 		// i.LabelName, err = d.prog.getLabelAt(i.Value, "")
 		// if err != nil {
 		// 	panic(err)
@@ -411,6 +628,7 @@ func (r *Rom) MarkAsInstruction(addr int) error {
 		i.Type = DirectInstruction
 		i.Payload = []byte{opCode, v}
 		i.Value = int(v)
+		i.Next, err = j.MarkAsInstruction(addr + 2)
 		// elem.Value = i
 
 		// d.removeElemAt(addr + 1)
@@ -428,6 +646,7 @@ func (r *Rom) MarkAsInstruction(addr int) error {
 		i.Payload = []byte{opCode, v}
 		i.Value = int(v)
 		i.RegisterName = i.RegisterName
+		i.Next, err = j.MarkAsInstruction(addr + 2)
 
 		// elem.Value = i
 
@@ -436,8 +655,8 @@ func (r *Rom) MarkAsInstruction(addr int) error {
 		// // next thing is definitely an instruction
 		// d.markAsInstruction(addr + 2)
 	}
-	fmt.Printf("got an instruction %v",i)
-	return nil
+	//fmt.Printf("got an instruction %v",i)
+	return i,err;
 }
 
 func (d *Disassembly) markAsInstruction(addr int) error {
@@ -946,6 +1165,17 @@ func (d *Disassembly) resolveDynJumpCases() {
 	d.dynJumps[len(d.dynJumps)-1] = dynJumpAddr + 2
 	d.markAsDataWordLabel(stmt.Offset, "")
 	d.resolveDynJumpCases()
+}
+
+func (r *Rom) Jit() (*Jitter, error){
+	jit := new(Jitter)
+	jit.jumpTables = make(map[int]bool)
+	jit.block = make(map[int]*Instruction)
+	jit.rom = r;
+
+	addr := 0x10000 - 0x4000*len(r.PrgRom);
+	jit.NewBlock(addr);
+	return jit,nil;
 }
 
 func (r *Rom) Disassemble() (*Program, error) {
