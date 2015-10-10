@@ -17,4 +17,5 @@ func main(){
 	}
 	j,_ := rom.Jit()
 	j.Print();
+	_, err = j.CompileToFilename("test")
 }

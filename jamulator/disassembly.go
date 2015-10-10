@@ -24,10 +24,14 @@ type Disassembly struct {
 }
 
 type Jitter struct {
-	rom 	*Rom
-	dynJumps   []int
-	jumpTables map[int]bool
-	block 	   map[int]*Instruction
+	rom 		*Rom
+	dynJumps   	[]int
+	jumpTables 	map[int]bool
+	block 	   	map[int]*Instruction
+
+	nmiVector 	int
+	resetVector int
+	irqVector 	int
 }
 
 func (d *Disassembly) elemAsByte(elem *list.Element) (byte, error) {
@@ -409,7 +413,7 @@ func (j *Jitter) Print(){
 	addr := 0x10000 - 0x4000*len(j.rom.PrgRom)
 	for i := j.block[addr]; i != nil; {
 		fmt.Printf("%v \n",i)
-		if i.OpName == "jmp" {
+		if i.OpName == "jmp" && i.Value != i.Offset {
 			i = j.block[i.Value]
 		} else if i.OpName == "jsr" {
 			s = s.Push(i)
@@ -430,6 +434,7 @@ func (j *Jitter) NewBlock(addr int) {
 	if _,ok := j.block[addr]; ok{
 		return
 	}else{
+		j.block[addr] = nil
 		j.block[addr], _ = j.MarkAsInstruction(addr)
 	}
 }
@@ -1173,8 +1178,22 @@ func (r *Rom) Jit() (*Jitter, error){
 	jit.block = make(map[int]*Instruction)
 	jit.rom = r;
 
-	addr := 0x10000 - 0x4000*len(r.PrgRom);
-	jit.NewBlock(addr);
+	//addr := 0x10000 - 0x4000*len(r.PrgRom);
+
+	// set up entry points
+	// c.setUpEntryPoint(p, 0xfffa, &c.nmiLabelName)
+	// c.setUpEntryPoint(p, 0xfffc, &c.resetLabelName)
+	// c.setUpEntryPoint(p, 0xfffe, &c.irqLabelName)
+
+	jit.nmiVector = int(r.ReadWord(0xfffa))
+	jit.resetVector = int(r.ReadWord(0xfffc))
+	jit.irqVector = int(r.ReadWord(0xfffe))
+
+	jit.NewBlock(jit.nmiVector)
+	jit.NewBlock(jit.resetVector)
+	jit.NewBlock(jit.irqVector)
+
+	//jit.NewBlock(addr);
 	return jit,nil;
 }
 

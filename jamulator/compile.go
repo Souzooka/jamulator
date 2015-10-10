@@ -150,12 +150,48 @@ func (c *Compilation) visitForControlFlow() {
 	}
 }
 
+func (c *Compilation) createLabels(j *Jitter) {
+	c.builder.SetInsertPointAtEnd(c.mainFn.EntryBasicBlock())
+	for k, _ := range j.block {
+		bb := llvm.AddBasicBlock(c.mainFn, string(k))
+		c.dynJumpAddrs[k] = bb
+		if k == j.nmiVector {
+			c.nmiBlock = &bb
+		} else if k == j.resetVector {
+			c.resetBlock = &bb
+		} else if k == j.irqVector {
+			c.irqBlock  = &bb
+		}
+	}
+}
+
 func (c *Compilation) visitForBasicBlocks() {
 	c.builder.SetInsertPointAtEnd(c.mainFn.EntryBasicBlock())
 	for e := c.program.List.Front(); e != nil; e = e.Next() {
 		labelStmt, ok := e.Value.(*LabelStatement)
 		if ok {
 			c.compileLabels(labelStmt)
+		}
+	}
+}
+
+func (c *Compilation) visitForCompileJitter(j *Jitter) {
+	c.currentBlock = nil
+	for addr , i := range j.block {
+		bb, ok := c.dynJumpAddrs[addr]
+		if !ok {
+			Panic("Missing block")
+			// we're not doing codegen for this block. skip.
+			return
+		}
+		if c.currentBlock != nil {
+			c.builder.CreateBr(bb)
+		}
+		c.currentBlock = &bb
+		c.builder.SetInsertPointAtEnd(bb)
+		for ; i != nil; i = i.Next {
+			c.currentInstr = i
+			i.Compile(c)
 		}
 	}
 }
@@ -2050,6 +2086,167 @@ func (p *Program) CompileToFile(file *os.File, flags CompileFlags) (*Compilation
 
 	return c, nil
 }
+
+func (j *Jitter) CompileToFile(file *os.File) (*Compilation, error) {
+	var flags CompileFlags 
+	llvm.InitializeNativeTarget()
+
+	c := new(Compilation)
+	c.Flags = flags
+	//c.program = p
+	c.mod = llvm.NewModule("asm_module")
+	c.builder = llvm.NewBuilder()
+	defer c.builder.Dispose()
+	c.labeledData = map[string]bool{}
+	c.labeledBlocks = map[string]llvm.BasicBlock{}
+	c.stringTable = map[string]llvm.Value{}
+	c.dynJumpAddrs = map[int]llvm.BasicBlock{}
+
+	//c.addLabelsAfterJsrs()
+
+	// 2KB memory
+	memType := llvm.ArrayType(llvm.Int8Type(), 0x800)
+	c.wram = llvm.AddGlobal(c.mod, memType, "wram")
+	c.wram.SetLinkage(llvm.PrivateLinkage)
+	c.wram.SetInitializer(llvm.ConstNull(memType))
+
+	//uint8_t rom_mirroring;
+	mirroringConst := llvm.ConstInt(llvm.Int8Type(), uint64(j.rom.Mirroring), false)
+	mirroringGlobal := llvm.AddGlobal(c.mod, mirroringConst.Type(), "rom_mirroring")
+	mirroringGlobal.SetLinkage(llvm.ExternalLinkage)
+	mirroringGlobal.SetInitializer(mirroringConst)
+
+	c.createFunctionDeclares()
+	c.createReadChrFn(j.rom.ChrRom)
+	c.createPrgRomGlobal(j.rom.PrgRom)
+
+	// first pass to figure out which blocks are "data" and which are "code"
+	// c.visitForControlFlow()
+	// if len(c.Errors) > 0 {
+	// 	return c, nil
+	// }
+
+	c.setupControllerFramework()
+	c.createRegisters()
+
+	// main function / entry point
+	mainType := llvm.FunctionType(llvm.VoidType(), []llvm.Type{llvm.Int8Type()}, false)
+	c.mainFn = llvm.AddFunction(c.mod, "rom_start", mainType)
+	c.mainFn.SetFunctionCallConv(llvm.CCallConv)
+	entry := llvm.AddBasicBlock(c.mainFn, "Entry")
+
+	// set up entry points
+	// c.nmiBlock = c.dynJumpAddrs[j.nmiVector]
+	// c.resetBlock = c.dynJumpAddrs[j.resetVector]
+	// c.irqBlock = c.dynJumpAddrs[j.irqVector]
+
+	// second pass to build basic blocks
+	c.createLabels(j)
+
+	c.interpretBlock = llvm.AddBasicBlock(c.mainFn, "Interpret")
+	c.dynJumpBlock = llvm.AddBasicBlock(c.mainFn, "DynJumpTable")
+	c.addInterpretBlock()
+	c.addDynJumpTable()
+
+	// finally, one last pass for codegen
+	c.visitForCompileJitter(j)
+
+	c.createReadMemFn()
+
+	// hook up entry points
+	if c.nmiBlock == nil {
+		c.Errors = append(c.Errors, "missing nmi entry point")
+		return c, nil
+	}
+	if c.resetBlock == nil {
+		c.Errors = append(c.Errors, "missing reset entry point")
+		return c, nil
+	}
+	if c.irqBlock == nil {
+		c.Warnings = append(c.Warnings, "missing irq entry point; inserting dummy.")
+		tmp := llvm.AddBasicBlock(c.mainFn, "IRQ_Routine")
+		c.irqBlock = &tmp
+		c.builder.SetInsertPointAtEnd(*c.irqBlock)
+		c.builder.CreateUnreachable()
+	}
+
+	// entry jump table
+	c.selectBlock(entry)
+	c.builder.SetInsertPointAtEnd(entry)
+	badInterruptBlock := c.createBlock("BadInterrupt")
+	sw := c.builder.CreateSwitch(c.mainFn.Param(0), badInterruptBlock, 3)
+	c.selectBlock(badInterruptBlock)
+	c.createPanic("invalid interrupt id: %d\n", []llvm.Value{c.mainFn.Param(0)})
+	sw.AddCase(llvm.ConstInt(llvm.Int8Type(), 1, false), *c.nmiBlock)
+	sw.AddCase(llvm.ConstInt(llvm.Int8Type(), 2, false), *c.resetBlock)
+	sw.AddCase(llvm.ConstInt(llvm.Int8Type(), 3, false), *c.irqBlock)
+
+	c.addNmiInterruptCode()
+	c.addResetInterruptCode()
+
+	if flags&DumpModulePreFlag != 0 {
+		c.mod.Dump()
+	}
+	err := llvm.VerifyModule(c.mod, llvm.ReturnStatusAction)
+	if err != nil {
+		c.Errors = append(c.Errors, err.Error())
+		return c, nil
+	}
+
+	options := llvm.NewMCJITCompilerOptions()
+	options.SetMCJITOptimizationLevel(3)
+	engine, err := llvm.NewMCJITCompiler(c.mod, options)
+	if err != nil {
+		c.Errors = append(c.Errors, err.Error())
+		return c, nil
+	}
+	defer engine.Dispose()
+
+	if flags&DisableOptFlag == 0 {
+		pass := llvm.NewPassManager()
+		defer pass.Dispose()
+
+		pass.Add(engine.TargetData())
+		pass.AddConstantPropagationPass()
+		pass.AddInstructionCombiningPass()
+		pass.AddPromoteMemoryToRegisterPass()
+		pass.AddGVNPass()
+		pass.AddCFGSimplificationPass()
+		pass.AddDeadStoreEliminationPass()
+		pass.AddGlobalDCEPass()
+		pass.Run(c.mod)
+	}
+
+	if flags&DumpModuleFlag != 0 {
+		c.mod.Dump()
+	}
+
+	err = llvm.WriteBitcodeToFile(c.mod, file)
+
+	if err != nil {
+		return c, err
+	}
+
+	return c, nil
+}
+func (j *Jitter) CompileToFilename(filename string) (*Compilation, error) {
+	fd, err := os.Create(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	c, err := j.CompileToFile(fd)
+	err2 := fd.Close()
+
+	if err != nil {
+		return nil, err
+	}
+	if err2 != nil {
+		return nil, err2
+	}
+	return c, nil
+}
+
 
 func (p *Program) CompileToFilename(filename string, flags CompileFlags) (*Compilation, error) {
 	fd, err := os.Create(filename)
