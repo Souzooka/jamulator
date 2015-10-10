@@ -1330,18 +1330,14 @@ func (c *Compilation) debugPrintStatus() {
 	}
 
 }
-func (c *Compilation) createBranch(cond llvm.Value, labelName string, instrAddr int) {
-	branchBlock := c.labeledBlocks[labelName]
+func (c *Compilation) createBranch(cond llvm.Value, addr int, instrAddr int) {
+	branchBlock := c.dynJumpAddrs[addr]
 	thenBlock := c.createBlock("then")
 	elseBlock := c.createBlock("else")
 	c.builder.CreateCondBr(cond, thenBlock, elseBlock)
 	// if the condition is met, the cycle count is 3 or 4, depending
 	// on whether the page boundary is crossed.
 	c.selectBlock(thenBlock)
-	addr, ok := c.program.Labels[labelName]
-	if !ok {
-		panic(fmt.Sprintf("label %s not defined", labelName))
-	}
 	if instrAddr&0xff00 == addr&0xff00 {
 		c.cycle(3, addr)
 	} else {

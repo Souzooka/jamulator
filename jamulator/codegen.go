@@ -24,14 +24,14 @@ func (i *Instruction) ResolveRender() string {
 func (i *Instruction) Compile(c *Compilation) {
 	c.debugPrint(fmt.Sprintf("%s\n", i.ResolveRender()))
 
-	var labelAddr int
-	var ok bool
-	if i.LabelName != "" {
-		labelAddr, ok = c.program.Labels[i.LabelName]
-		if !ok {
-			panic(fmt.Sprintf("label %s addr not defined: %s", i.LabelName, i.Render()))
-		}
-	}
+	// var labelAddr int
+	// var ok bool
+	// if i.LabelName != "" {
+	// 	labelAddr, ok = c.program.Labels[i.LabelName]
+	// 	if !ok {
+	// 		panic(fmt.Sprintf("label %s addr not defined: %s", i.LabelName, i.Render()))
+	// 	}
+	// }
 	var immedValue llvm.Value
 	if i.Type == ImmediateInstruction {
 		immedValue = llvm.ConstInt(llvm.Int8Type(), uint64(i.Value), false)
@@ -365,8 +365,8 @@ func (i *Instruction) Compile(c *Compilation) {
 		c.currentBlock = nil
 	case 0x4c: // jmp
 		// branch instruction - cycle before execution
-		c.cycle(3, labelAddr)
-		destBlock, ok := c.labeledBlocks[i.LabelName]
+		c.cycle(3, i.Value)
+		destBlock, ok := c.dynJumpAddrs[i.Value]
 		if ok {
 			// cool, we're jumping into statically compiled code
 			c.builder.CreateBr(destBlock)
@@ -382,7 +382,7 @@ func (i *Instruction) Compile(c *Compilation) {
 
 		c.pushWordToStack(pc)
 		c.cycle(6, i.Value)
-		destBlock, ok := c.labeledBlocks[i.LabelName]
+		destBlock, ok := c.dynJumpAddrs[i.Value]
 		if ok {
 			// cool, we're jumping into statically compiled code
 			c.builder.CreateBr(destBlock)
@@ -394,25 +394,25 @@ func (i *Instruction) Compile(c *Compilation) {
 		c.currentBlock = nil
 	case 0xf0: // beq
 		isZero := c.builder.CreateLoad(c.rSZero, "")
-		c.createBranch(isZero, i.LabelName, i.Offset)
+		c.createBranch(isZero, i.Value, i.Offset)
 	case 0x90: // bcc
 		isCarry := c.builder.CreateLoad(c.rSCarry, "")
 		notCarry := c.builder.CreateNot(isCarry, "")
-		c.createBranch(notCarry, i.LabelName, i.Offset)
+		c.createBranch(notCarry, i.Value, i.Offset)
 	case 0xb0: // bcs
 		isCarry := c.builder.CreateLoad(c.rSCarry, "")
-		c.createBranch(isCarry, i.LabelName, i.Offset)
+		c.createBranch(isCarry, i.Value, i.Offset)
 	case 0x30: // bmi
 		isNeg := c.builder.CreateLoad(c.rSNeg, "")
-		c.createBranch(isNeg, i.LabelName, i.Offset)
+		c.createBranch(isNeg, i.Value, i.Offset)
 	case 0xd0: // bne
 		isZero := c.builder.CreateLoad(c.rSZero, "")
 		notZero := c.builder.CreateNot(isZero, "")
-		c.createBranch(notZero, i.LabelName, i.Offset)
+		c.createBranch(notZero, i.Value, i.Offset)
 	case 0x10: // bpl
 		isNeg := c.builder.CreateLoad(c.rSNeg, "")
 		notNeg := c.builder.CreateNot(isNeg, "")
-		c.createBranch(notNeg, i.LabelName, i.Offset)
+		c.createBranch(notNeg, i.Value, i.Offset)
 	//case 0x50: // bvc
 	//case 0x70: // bvs
 
