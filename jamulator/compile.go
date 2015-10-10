@@ -180,7 +180,7 @@ func (c *Compilation) visitForCompileJitter(j *Jitter) {
 	for addr , i := range j.block {
 		bb, ok := c.dynJumpAddrs[addr]
 		if !ok {
-			Panic("Missing block")
+			panic("Missing block")
 			// we're not doing codegen for this block. skip.
 			return
 		}
@@ -189,6 +189,7 @@ func (c *Compilation) visitForCompileJitter(j *Jitter) {
 		}
 		c.currentBlock = &bb
 		c.builder.SetInsertPointAtEnd(bb)
+		fmt.Printf("make block, compile \n")
 		for ; i != nil; i = i.Next {
 			c.currentInstr = i
 			i.Compile(c)
@@ -1331,6 +1332,7 @@ func (c *Compilation) debugPrintStatus() {
 
 }
 func (c *Compilation) createBranch(cond llvm.Value, addr int, instrAddr int) {
+	fmt.Printf("make createBranch, %v \n", c.currentBlock)
 	branchBlock := c.dynJumpAddrs[addr]
 	thenBlock := c.createBlock("then")
 	elseBlock := c.createBlock("else")
