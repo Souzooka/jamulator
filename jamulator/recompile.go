@@ -85,9 +85,9 @@ func (rom *Rom) RecompileToBinary(filename string, flags CompileFlags) error {
 	if err != nil {
 		return err
 	}
-	if len(c.Errors) != 0 {
-		return errors.New(strings.Join(c.Errors, "\n"))
-	}
+	// if len(c.Errors) != 0 {
+	// 	return errors.New(strings.Join(c.Errors, "\n"))
+	// }
 	if len(c.Warnings) != 0 {
 		fmt.Fprintf(os.Stderr, "Warnings:\n%s\n", strings.Join(c.Warnings, "\n"))
 	}

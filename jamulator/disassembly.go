@@ -435,13 +435,17 @@ func (j *Jitter) Print(){
 
 }
 
-func (j *Jitter) NewBlock(addr int) {
+func (j *Jitter) NewBlock(addr int) error {
 	//fmt.Printf("new block: %v, items: %v \n", addr, len(j.block))
 	if _,ok := j.block[addr]; ok{
-		return
+		return nil
 	}else{
 		j.block[addr] = nil
-		j.block[addr], _ = j.MarkAsInstruction(addr)
+		i, err := j.MarkAsInstruction(addr)
+		if err == nil {
+			j.block[addr] = i
+		}
+		return err
 	}
 }
 

@@ -21,5 +21,5 @@ func main(){
 	// fmt.Printf("errs: %v %v",err,c.Errors)
 
 	var fl jamulator.CompileFlags
-	rom.RecompileToBinary(filename,fl)
+	rom.RecompileToBinary(filename+"x",fl)
 }
