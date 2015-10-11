@@ -1152,6 +1152,27 @@ func (p *Program) elemLabelStmt(elem *list.Element) *LabelStatement {
 	return nil
 }
 
+func (j *Jitter) resolveDynJumpCases() {
+	// this function is recursive, since calling markAsDataWordLabel can
+	// append more dynJumps
+	if len(j.dynJumps) == 0 {
+		return
+	}
+	// use the last item in the dynJumps list, and check a single address
+	dynJumpAddr := j.dynJumps[len(j.dynJumps)-1]
+	newAddr := j.rom.ReadWord(dynJumpAddr)
+
+	if _, ok := j.block[int(newAddr)]; ok {
+		j.dynJumps = j.dynJumps[0 : len(j.dynJumps)-1]
+		j.resolveDynJumpCases()
+		return
+	} else {
+		j.NewBlock(int(newAddr))
+		j.dynJumps[len(j.dynJumps)-1] = dynJumpAddr + 2
+		j.resolveDynJumpCases()
+	}
+}
+
 func (d *Disassembly) resolveDynJumpCases() {
 	// this function is recursive, since calling markAsDataWordLabel can
 	// append more dynJumps
@@ -1201,6 +1222,8 @@ func (r *Rom) Jit() (*Jitter, error){
 	jit.NewBlock(jit.nmiVector)
 	jit.NewBlock(jit.resetVector)
 	jit.NewBlock(jit.irqVector)
+
+	jit.resolveDynJumpCases()
 
 	//jit.NewBlock(addr);
 	return jit,nil;
