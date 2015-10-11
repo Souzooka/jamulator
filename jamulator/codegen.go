@@ -91,7 +91,7 @@ func (i *Instruction) Compile(c *Compilation) {
 		c.pushToStack(c.getStatusByte())
 		c.setInt()
 		c.cycle(7, -1)
-		fmt.Printf("brk")
+		//fmt.Printf("brk")
 		c.currentBlock = nil
 		c.builder.CreateBr(*c.resetBlock)
 	case 0x18: // clc implied
@@ -156,7 +156,7 @@ func (i *Instruction) Compile(c *Compilation) {
 		c.builder.CreateStore(pc, c.rPC)
 		c.cycle(6, -1) // -1 because we already stored the PC
 		c.builder.CreateRetVoid()
-		fmt.Printf("rti")
+		//fmt.Printf("rti")
 		c.currentBlock = nil
 	case 0x60: // rts implied
 		pc := c.pullWordFromStack()
@@ -165,7 +165,7 @@ func (i *Instruction) Compile(c *Compilation) {
 		c.builder.CreateStore(pc, c.rPC)
 		c.cycle(6, -1)
 		c.builder.CreateBr(c.dynJumpBlock)
-		fmt.Printf("rts next: %v\n",i.Next)
+		//fmt.Printf("rts next: %v\n",i.Next)
 		c.currentBlock = nil
 	case 0xf8: // sed implied
 		c.setDec()
@@ -365,7 +365,7 @@ func (i *Instruction) Compile(c *Compilation) {
 		c.builder.CreateStore(newPc, c.rPC)
 		c.cycle(5, -1)
 		c.builder.CreateBr(c.dynJumpBlock)
-		fmt.Printf("jmp indirect")
+		//fmt.Printf("jmp indirect")
 		c.currentBlock = nil
 	case 0x4c: // jmp
 		// branch instruction - cycle before execution
@@ -378,7 +378,7 @@ func (i *Instruction) Compile(c *Compilation) {
 			// damn, we'll have to interpret the next instruction
 			c.builder.CreateBr(c.interpretBlock)
 		}
-		fmt.Printf("jump")
+		//fmt.Printf("jump")
 		c.currentBlock = nil
 	case 0x20: // jsr
 		pc := llvm.ConstInt(llvm.Int16Type(), uint64(i.Offset+2), false)
@@ -396,8 +396,8 @@ func (i *Instruction) Compile(c *Compilation) {
 			c.builder.CreateBr(c.interpretBlock)
 
 		}
-		fmt.Printf("jsr")
-		//c.currentBlock = nil
+		//fmt.Printf("jsr")
+		c.currentBlock = nil
 	case 0xf0: // beq
 		isZero := c.builder.CreateLoad(c.rSZero, "")
 		c.createBranch(isZero, i.Value, i.Offset)

@@ -185,12 +185,14 @@ func (c *Compilation) visitForCompileJitter(j *Jitter) {
 			return
 		}
 		if c.currentBlock != nil {
+			//panic("should be null")
 			c.builder.CreateBr(bb)
 		}
 		c.currentBlock = &bb
 		c.builder.SetInsertPointAtEnd(bb)
 		fmt.Printf("make block, compile \n")
 		for ; i != nil; i = i.Next {
+			fmt.Printf("%v \n",i)
 			c.currentInstr = i
 			i.Compile(c)
 		}

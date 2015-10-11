@@ -133,22 +133,28 @@ func (r *Rom) detectJumpTable(addr int) bool{
 	state := expectAsl
 	var memA, memC byte
 	for opCode := r.Read(addr); ; addr++ {
+		opCode = r.Read(addr)
 		switch state {
 		case expectAsl:
 			if opCode != 0x0a {
 				return false
 			}
 			state = expectTay
+			fmt.Printf("jump1, expected: 0x0a, got: %x\n",opCode)
+			fmt.Printf("jump1")
 		case expectTay:
+			fmt.Printf("jump2, expected: 0xa8, got: %x\n",opCode)
 			if opCode != 0xa8 {
 				return false
 			}
 			state = expectPlaA
+			fmt.Printf("jump2")
 		case expectPlaA:
 			if opCode != 0x68 {
 				return false
 			}
 			state = expectStaA
+			fmt.Printf("jump3")
 		case expectStaA:
 			if opCode != 0x85 && opCode != 0x8d {
 				return false
@@ -450,6 +456,7 @@ func (j *Jitter) MarkAsInstruction(addr int) (*Instruction, error) {
 	i.Offset = addr
 	switch opCodeInfo.addrMode {
 	case nilAddr:
+		fmt.Printf("cannot disassemble as instruction: bad op code %x",opCode)
 		return nil, errors.New("cannot disassemble as instruction: bad op code")
 	case absAddr:
 		// convert data statements into instruction statement
@@ -469,7 +476,9 @@ func (j *Jitter) MarkAsInstruction(addr int) (*Instruction, error) {
 				// mark this and remember to come back later
 				j.dynJumps = append(j.dynJumps, addr+3)
 			} else {
-				i.Next, err = j.MarkAsInstruction(addr + 3)
+				//i.Next, err = j.MarkAsInstruction(addr + 3)
+				//Make a new block we can jump to from RTS
+				j.NewBlock(addr + 3)
 			}
 		default:
 			i.Next, err = j.MarkAsInstruction(addr + 3)

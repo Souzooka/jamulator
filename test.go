@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"github.com/andrewrk/jamulator/jamulator"
+	"github.com/badfortrains/jamulator/jamulator"
 	"flag"
+	"fmt"
 	"os"
 )
 
@@ -15,8 +15,11 @@ func main(){
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		os.Exit(1)
 	}
-	j,_ := rom.Jit()
-	j.Print();
-	c, err := j.CompileToFilename("test")
-	fmt.Printf("errs: %v %v",err,c.Errors)
+	// j,_ := rom.Jit()
+	// j.Print();
+	// c, err := j.CompileToFilename("test")
+	// fmt.Printf("errs: %v %v",err,c.Errors)
+
+	var fl jamulator.CompileFlags
+	rom.RecompileToBinary(filename,fl)
 }
