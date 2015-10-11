@@ -198,6 +198,7 @@ func (c *Compilation) visitForCompileJitter(j *Jitter) {
 }
 
 func (c *Compilation) visitForCompile() {
+	fmt.Printf("visit for compile")
 	c.currentBlock = nil
 	for e := c.program.List.Front(); e != nil; e = e.Next() {
 		switch t := e.Value.(type) {
@@ -1139,6 +1140,9 @@ func (c *Compilation) createBlock(name string) llvm.BasicBlock {
 func (c *Compilation) selectBlock(bb llvm.BasicBlock) {
 	c.builder.SetInsertPointAtEnd(bb)
 	c.currentBlock = &bb
+	if(c.currentBlock == nil){
+		panic("no current block")
+	}
 }
 
 func (c *Compilation) createPanic(msg string, args []llvm.Value) {
@@ -1332,7 +1336,7 @@ func (c *Compilation) debugPrintStatus() {
 
 }
 func (c *Compilation) createBranch(cond llvm.Value, addr int, instrAddr int) {
-	fmt.Printf("make createBranch, %v \n", c.currentBlock)
+	//fmt.Printf("make createBranch, %v \n", c.currentBlock)
 	branchBlock := c.dynJumpAddrs[addr]
 	thenBlock := c.createBlock("then")
 	elseBlock := c.createBlock("else")
@@ -1508,6 +1512,7 @@ func (s *LabelStatement) Compile(c *Compilation) {
 	if c.currentBlock != nil {
 		c.builder.CreateBr(bb)
 	}
+	fmt.Printf("compile label")
 	c.currentBlock = &bb
 	c.builder.SetInsertPointAtEnd(bb)
 }
@@ -2151,6 +2156,8 @@ func (j *Jitter) CompileToFile(file *os.File) (*Compilation, error) {
 
 	c.createReadMemFn()
 
+	fmt.Printf("past visit")
+
 	// hook up entry points
 	if c.nmiBlock == nil {
 		c.Errors = append(c.Errors, "missing nmi entry point")
@@ -2191,8 +2198,10 @@ func (j *Jitter) CompileToFile(file *os.File) (*Compilation, error) {
 		return c, nil
 	}
 
+	fmt.Printf("dump the")
+	c.mod.Dump()
 	options := llvm.NewMCJITCompilerOptions()
-	options.SetMCJITOptimizationLevel(3)
+	options.SetMCJITOptimizationLevel(0)
 	engine, err := llvm.NewMCJITCompiler(c.mod, options)
 	if err != nil {
 		c.Errors = append(c.Errors, err.Error())
@@ -2200,7 +2209,8 @@ func (j *Jitter) CompileToFile(file *os.File) (*Compilation, error) {
 	}
 	defer engine.Dispose()
 
-	if flags&DisableOptFlag == 0 {
+	//if flags&DisableOptFlag == 0 {
+	if false {
 		pass := llvm.NewPassManager()
 		defer pass.Dispose()
 
@@ -2215,7 +2225,8 @@ func (j *Jitter) CompileToFile(file *os.File) (*Compilation, error) {
 		pass.Run(c.mod)
 	}
 
-	if flags&DumpModuleFlag != 0 {
+	//if flags&DumpModuleFlag != 0 {
+	if true {
 		c.mod.Dump()
 	}
 
