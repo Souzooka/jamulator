@@ -32,6 +32,8 @@ type Jitter struct {
 	nmiVector 	int
 	resetVector int
 	irqVector 	int
+
+	JumpCount int
 }
 
 func (d *Disassembly) elemAsByte(elem *list.Element) (byte, error) {
@@ -140,7 +142,7 @@ func (r *Rom) detectJumpTable(addr int) bool{
 				return false
 			}
 			state = expectTay
-			fmt.Printf("jump1, expected: 0x0a, got: %x\n",opCode)
+			fmt.Printf("jump1 at %x, expected: 0x0a, got: %x\n",addr,opCode)
 			fmt.Printf("jump1")
 		case expectTay:
 			fmt.Printf("jump2, expected: 0xa8, got: %x\n",opCode)
@@ -441,8 +443,10 @@ func (j *Jitter) NewBlock(addr int) error {
 		return nil
 	}else{
 		j.block[addr] = nil
+		fmt.Printf("create block at %x \n", addr)
 		i, err := j.MarkAsInstruction(addr)
 		if err == nil {
+			fmt.Printf("create block at %x success \n", addr)
 			j.block[addr] = i
 		}
 		return err
@@ -1156,23 +1160,34 @@ func (p *Program) elemLabelStmt(elem *list.Element) *LabelStatement {
 	return nil
 }
 
+// func (j *Jitter) resolveDynJumpCases() {
+// 	for addr := range j.dynJumps {
+// 		for index := 0; index < 80; index++ {
+// 			newAddr := j.rom.ReadWord(addr + (2 * index))
+// 			fmt.Printf("compile at %x \n", newAddr)
+// 			j.NewBlock(int(newAddr))
+// 		}
+// 	}
+// }
+
 func (j *Jitter) resolveDynJumpCases() {
 	// this function is recursive, since calling markAsDataWordLabel can
 	// append more dynJumps
 	if len(j.dynJumps) == 0 {
 		return
 	}
+	j.JumpCount += 1
 	// use the last item in the dynJumps list, and check a single address
 	dynJumpAddr := j.dynJumps[len(j.dynJumps)-1]
 	newAddr := j.rom.ReadWord(dynJumpAddr)
 
-	if _, ok := j.block[int(newAddr)]; ok {
+	if _ , ok := j.block[dynJumpAddr]; ok {
 		j.dynJumps = j.dynJumps[0 : len(j.dynJumps)-1]
 		j.resolveDynJumpCases()
 		return
 	} else {
-		j.NewBlock(int(newAddr))
 		j.dynJumps[len(j.dynJumps)-1] = dynJumpAddr + 2
+		j.NewBlock(int(newAddr))
 		j.resolveDynJumpCases()
 	}
 }

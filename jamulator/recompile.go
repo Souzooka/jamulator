@@ -81,13 +81,13 @@ func (rom *Rom) RecompileToBinary(filename string, flags CompileFlags) error {
 	tmpPrgObject := path.Join(tmpDir, "prg.o")
 
 	fmt.Fprintf(os.Stderr, "Decompiling...\n")
-	c, err := j.CompileToFilename(tmpPrgBitcode)
+	c, err := j.CompileToFilename(tmpPrgBitcode, flags)
 	if err != nil {
 		return err
 	}
-	// if len(c.Errors) != 0 {
-	// 	return errors.New(strings.Join(c.Errors, "\n"))
-	// }
+	if len(c.Errors) != 0 {
+		return errors.New(strings.Join(c.Errors, "\n"))
+	}
 	if len(c.Warnings) != 0 {
 		fmt.Fprintf(os.Stderr, "Warnings:\n%s\n", strings.Join(c.Warnings, "\n"))
 	}

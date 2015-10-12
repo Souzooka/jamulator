@@ -154,6 +154,7 @@ func (c *Compilation) createLabels(j *Jitter) {
 	c.builder.SetInsertPointAtEnd(c.mainFn.EntryBasicBlock())
 	for k, _ := range j.block {
 		bb := llvm.AddBasicBlock(c.mainFn, string(k))
+		fmt.Printf("create block at %x", k)
 		c.dynJumpAddrs[k] = bb
 		if k == j.nmiVector {
 			c.nmiBlock = &bb
@@ -1774,6 +1775,7 @@ func (c *Compilation) addDynJumpTable() {
 	// here we create a basic block that we jump to for instructions such as
 	// BRK, RTS, and RTI.
 	c.builder.SetInsertPointAtEnd(c.dynJumpBlock)
+	c.debugPrintf("dynamic jump", []llvm.Value{})
 	pc := c.builder.CreateLoad(c.rPC, "")
 	sw := c.builder.CreateSwitch(pc, c.interpretBlock, len(c.dynJumpAddrs))
 	for addr, block := range c.dynJumpAddrs {
@@ -2092,8 +2094,7 @@ func (p *Program) CompileToFile(file *os.File, flags CompileFlags) (*Compilation
 	return c, nil
 }
 
-func (j *Jitter) CompileToFile(file *os.File) (*Compilation, error) {
-	var flags CompileFlags 
+func (j *Jitter) CompileToFile(file *os.File, flags CompileFlags) (*Compilation, error) {
 	llvm.InitializeNativeTarget()
 
 	c := new(Compilation)
@@ -2151,6 +2152,10 @@ func (j *Jitter) CompileToFile(file *os.File) (*Compilation, error) {
 	c.interpretBlock = llvm.AddBasicBlock(c.mainFn, "Interpret")
 	c.dynJumpBlock = llvm.AddBasicBlock(c.mainFn, "DynJumpTable")
 	c.addInterpretBlock()
+	fmt.Printf("create dynamic jump table %v\n", len(c.dynJumpAddrs))
+	b, _ := c.dynJumpAddrs[0x8231]
+	fmt.Printf("block at 8231: %v", b)
+
 	c.addDynJumpTable()
 
 	// finally, one last pass for codegen
@@ -2191,9 +2196,9 @@ func (j *Jitter) CompileToFile(file *os.File) (*Compilation, error) {
 	c.addNmiInterruptCode()
 	c.addResetInterruptCode()
 
-	if flags&DumpModulePreFlag != 0 {
-		c.mod.Dump()
-	}
+	// if flags&DumpModulePreFlag != 0 {
+	// 	c.mod.Dump()
+	// }
 	err := llvm.VerifyModule(c.mod, llvm.ReturnStatusAction)
 	if err != nil {
 		c.Errors = append(c.Errors, err.Error())
@@ -2201,7 +2206,7 @@ func (j *Jitter) CompileToFile(file *os.File) (*Compilation, error) {
 	}
 
 	fmt.Printf("dump the")
-	c.mod.Dump()
+	//c.mod.Dump()
 	options := llvm.NewMCJITCompilerOptions()
 	options.SetMCJITOptimizationLevel(0)
 	engine, err := llvm.NewMCJITCompiler(c.mod, options)
@@ -2228,9 +2233,9 @@ func (j *Jitter) CompileToFile(file *os.File) (*Compilation, error) {
 	}
 
 	//if flags&DumpModuleFlag != 0 {
-	if true {
-		c.mod.Dump()
-	}
+	// if true {
+	// 	c.mod.Dump()
+	// }
 
 	err = llvm.WriteBitcodeToFile(c.mod, file)
 
@@ -2240,13 +2245,13 @@ func (j *Jitter) CompileToFile(file *os.File) (*Compilation, error) {
 
 	return c, nil
 }
-func (j *Jitter) CompileToFilename(filename string) (*Compilation, error) {
+func (j *Jitter) CompileToFilename(filename string, flags CompileFlags) (*Compilation, error) {
 	fd, err := os.Create(filename)
 	if err != nil {
 		return nil, err
 	}
 
-	c, err := j.CompileToFile(fd)
+	c, err := j.CompileToFile(fd, flags)
 	err2 := fd.Close()
 
 	if err != nil {
