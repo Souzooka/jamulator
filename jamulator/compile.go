@@ -1775,7 +1775,6 @@ func (c *Compilation) addDynJumpTable() {
 	// here we create a basic block that we jump to for instructions such as
 	// BRK, RTS, and RTI.
 	c.builder.SetInsertPointAtEnd(c.dynJumpBlock)
-	c.debugPrintf("dynamic jump", []llvm.Value{})
 	pc := c.builder.CreateLoad(c.rPC, "")
 	sw := c.builder.CreateSwitch(pc, c.interpretBlock, len(c.dynJumpAddrs))
 	for addr, block := range c.dynJumpAddrs {
@@ -2152,9 +2151,6 @@ func (j *Jitter) CompileToFile(file *os.File, flags CompileFlags) (*Compilation,
 	c.interpretBlock = llvm.AddBasicBlock(c.mainFn, "Interpret")
 	c.dynJumpBlock = llvm.AddBasicBlock(c.mainFn, "DynJumpTable")
 	c.addInterpretBlock()
-	fmt.Printf("create dynamic jump table %v\n", len(c.dynJumpAddrs))
-	b, _ := c.dynJumpAddrs[0x8231]
-	fmt.Printf("block at 8231: %v", b)
 
 	c.addDynJumpTable()
 

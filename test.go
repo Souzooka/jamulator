@@ -23,6 +23,6 @@ func main(){
 	// fmt.Printf("jumpcount: %v",j.JumpCount)
 
 	var flags jamulator.CompileFlags
-	flags |= jamulator.IncludeDebugFlag
+	//flags |= jamulator.IncludeDebugFlag
 	rom.RecompileToBinary(filename+"x",flags)
 }
