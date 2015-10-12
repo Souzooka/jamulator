@@ -24,5 +24,5 @@ func main(){
 
 	var flags jamulator.CompileFlags
 	flags |= jamulator.IncludeDebugFlag
-	rom.RecompileToBinary(filename+"x",flags)
+	rom.RecompileToBinary(filename+"123",flags)
 }

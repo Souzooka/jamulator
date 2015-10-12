@@ -154,7 +154,6 @@ func (c *Compilation) createLabels(j *Jitter) {
 	c.builder.SetInsertPointAtEnd(c.mainFn.EntryBasicBlock())
 	for k, _ := range j.block {
 		bb := llvm.AddBasicBlock(c.mainFn, string(k))
-		fmt.Printf("create block at %x", k)
 		c.dynJumpAddrs[k] = bb
 		if k == j.nmiVector {
 			c.nmiBlock = &bb
@@ -191,9 +190,7 @@ func (c *Compilation) visitForCompileJitter(j *Jitter) {
 		}
 		c.currentBlock = &bb
 		c.builder.SetInsertPointAtEnd(bb)
-		fmt.Printf("make block, compile \n")
 		for ; i != nil; i = i.Next {
-			fmt.Printf("%v \n",i)
 			c.currentInstr = i
 			i.Compile(c)
 		}
@@ -1775,7 +1772,6 @@ func (c *Compilation) addDynJumpTable() {
 	// here we create a basic block that we jump to for instructions such as
 	// BRK, RTS, and RTI.
 	c.builder.SetInsertPointAtEnd(c.dynJumpBlock)
-	c.debugPrintf("dynamic jump", []llvm.Value{})
 	pc := c.builder.CreateLoad(c.rPC, "")
 	sw := c.builder.CreateSwitch(pc, c.interpretBlock, len(c.dynJumpAddrs))
 	for addr, block := range c.dynJumpAddrs {
@@ -2208,7 +2204,7 @@ func (j *Jitter) CompileToFile(file *os.File, flags CompileFlags) (*Compilation,
 	fmt.Printf("dump the")
 	//c.mod.Dump()
 	options := llvm.NewMCJITCompilerOptions()
-	options.SetMCJITOptimizationLevel(0)
+	options.SetMCJITOptimizationLevel(3)
 	engine, err := llvm.NewMCJITCompiler(c.mod, options)
 	if err != nil {
 		c.Errors = append(c.Errors, err.Error())
@@ -2217,7 +2213,7 @@ func (j *Jitter) CompileToFile(file *os.File, flags CompileFlags) (*Compilation,
 	defer engine.Dispose()
 
 	//if flags&DisableOptFlag == 0 {
-	if false {
+	if true {
 		pass := llvm.NewPassManager()
 		defer pass.Dispose()
 

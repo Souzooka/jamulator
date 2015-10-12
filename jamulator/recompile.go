@@ -79,6 +79,7 @@ func (rom *Rom) RecompileToBinary(filename string, flags CompileFlags) error {
 	runtimeArchive := "runtime/runtime.a"
 	tmpPrgBitcode := path.Join(tmpDir, "prg.bc")
 	tmpPrgObject := path.Join(tmpDir, "prg.o")
+	fmt.Printf("temp dir is %v",tmpDir)
 
 	fmt.Fprintf(os.Stderr, "Decompiling...\n")
 	c, err := j.CompileToFilename(tmpPrgBitcode, flags)
@@ -92,7 +93,7 @@ func (rom *Rom) RecompileToBinary(filename string, flags CompileFlags) error {
 		fmt.Fprintf(os.Stderr, "Warnings:\n%s\n", strings.Join(c.Warnings, "\n"))
 	}
 	fmt.Fprintf(os.Stderr, "Compiling...\n")
-	out, err := exec.Command("llc", "-o", tmpPrgObject, "-filetype=obj", "-relocation-model=pic", tmpPrgBitcode).CombinedOutput()
+	out, err := exec.Command("llc-3.6", "-o", tmpPrgObject, "-filetype=obj", "-relocation-model=pic", tmpPrgBitcode).CombinedOutput()
 	fmt.Fprint(os.Stderr, string(out))
 	if err != nil {
 		return err
