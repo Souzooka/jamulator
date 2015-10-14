@@ -142,21 +142,16 @@ func (r *Rom) detectJumpTable(addr int) bool{
 				return false
 			}
 			state = expectTay
-			fmt.Printf("jump1 at %x, expected: 0x0a, got: %x\n",addr,opCode)
-			fmt.Printf("jump1")
 		case expectTay:
-			fmt.Printf("jump2, expected: 0xa8, got: %x\n",opCode)
 			if opCode != 0xa8 {
 				return false
 			}
 			state = expectPlaA
-			fmt.Printf("jump2")
 		case expectPlaA:
 			if opCode != 0x68 {
 				return false
 			}
 			state = expectStaA
-			fmt.Printf("jump3")
 		case expectStaA:
 			if opCode != 0x85 && opCode != 0x8d {
 				return false
@@ -230,7 +225,6 @@ func (r *Rom) detectJumpTable(addr int) bool{
 			if r.Read(addr) != memC {
 				return false
 			}
-			fmt.Printf("new jump table")
 			return true
 		}
 	}
@@ -420,7 +414,6 @@ func (j *Jitter) Print(){
 	var s stack
 	addr := 0x10000 - 0x4000*len(j.rom.PrgRom)
 	for i := j.block[addr]; i != nil; {
-		fmt.Printf("%v \n",i)
 		if i.OpName == "jmp" && i.Value != i.Offset {
 			i = j.block[i.Value]
 		} else if i.OpName == "jsr" {
@@ -438,15 +431,12 @@ func (j *Jitter) Print(){
 }
 
 func (j *Jitter) NewBlock(addr int) error {
-	//fmt.Printf("new block: %v, items: %v \n", addr, len(j.block))
 	if _,ok := j.block[addr]; ok{
 		return nil
 	}else{
 		j.block[addr] = nil
-		fmt.Printf("create block at %x \n", addr)
 		i, err := j.MarkAsInstruction(addr)
 		if err == nil {
-			fmt.Printf("create block at %x success \n", addr)
 			j.block[addr] = i
 		}
 		return err

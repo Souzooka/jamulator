@@ -1,3 +1,6 @@
+#ifndef ROM_H
+#define ROM_H
+
 #include "stdint.h"
 
 enum {
@@ -34,18 +37,18 @@ uint8_t rom_mirroring;
 uint8_t rom_chr_bank_count;
 
 // write the chr rom into dest
-void rom_read_chr(uint8_t* dest);
+// void rom_read_chr(uint8_t* dest);
 
-// starts executing the PRG ROM.
-// this function returns when the RTI instruction is executed,
-// or the program exits.
-// when an interrupt occurs, call rom_start with the interrupt
-// index.
-void rom_start(uint8_t interrupt);
+// // starts executing the PRG ROM.
+// // this function returns when the RTI instruction is executed,
+// // or the program exits.
+// // when an interrupt occurs, call rom_start with the interrupt
+// // index.
+// void rom_start(uint8_t interrupt);
 
 // called after every instruction with the number of
 // cpu cycles that have passed.
-void rom_cycle(uint8_t);
+void rom_cycle(uint8_t t);
 
 // PPU hooks
 uint8_t rom_ppu_read_status();
@@ -83,8 +86,19 @@ void rom_apu_write_dmcsamplelength(uint8_t);
 void rom_apu_write_controlflags1(uint8_t);
 void rom_apu_write_controlflags2(uint8_t);
 
-// controller
-void rom_set_button_state(uint8_t padIndex, uint8_t buttonIndex, uint8_t value);
+typedef void (*rom_set_button_state_func) (uint8_t padIndex, uint8_t buttonIndex, uint8_t value);
+typedef uint8_t (*rom_ram_read_func) (uint16_t addr);
+typedef void (*rom_read_chr_func) (uint8_t* dest);
+typedef void (*rom_start_func) (uint8_t interrupt);
 
-// RAM
-uint8_t rom_ram_read(uint16_t addr);
+void mainentry(rom_set_button_state_func set_button,
+    rom_ram_read_func ram_read,
+    rom_read_chr_func read_chr,
+    rom_start_func start);
+// // controller
+// void rom_set_button_state(uint8_t padIndex, uint8_t buttonIndex, uint8_t value);
+
+// // RAM
+// uint8_t rom_ram_read(uint16_t addr);
+
+#endif /*  ROM_H */

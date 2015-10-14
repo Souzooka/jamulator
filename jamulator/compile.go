@@ -58,6 +58,8 @@ type Compilation struct {
 
 	// ABI
 	mainFn    llvm.Value
+	startFn   llvm.Value
+	initializeFn llvm.Value
 	printfFn  llvm.Value
 	putCharFn llvm.Value
 	memcpyFn  llvm.Value
@@ -100,6 +102,8 @@ type Compilation struct {
 	// pads
 	padWriteFn llvm.Value
 	padReadFn  llvm.Value
+
+	glob llvm.Value
 }
 
 type CompileFlags int
@@ -154,7 +158,6 @@ func (c *Compilation) createLabels(j *Jitter) {
 	c.builder.SetInsertPointAtEnd(c.mainFn.EntryBasicBlock())
 	for k, _ := range j.block {
 		bb := llvm.AddBasicBlock(c.mainFn, string(k))
-		fmt.Printf("create block at %x", k)
 		c.dynJumpAddrs[k] = bb
 		if k == j.nmiVector {
 			c.nmiBlock = &bb
@@ -191,9 +194,7 @@ func (c *Compilation) visitForCompileJitter(j *Jitter) {
 		}
 		c.currentBlock = &bb
 		c.builder.SetInsertPointAtEnd(bb)
-		fmt.Printf("make block, compile \n")
 		for ; i != nil; i = i.Next {
-			fmt.Printf("%v \n",i)
 			c.currentInstr = i
 			i.Compile(c)
 		}
@@ -1588,11 +1589,13 @@ func (c *Compilation) createPrgRomGlobal(prgRom [][]byte) {
 
 func (c *Compilation) createReadChrFn(chrRom [][]byte) {
 	//uint8_t rom_chr_bank_count;
+	fmt.Printf("CHARACTER ROM %v",len(chrRom))
 	bankCountConst := llvm.ConstInt(llvm.Int8Type(), uint64(len(chrRom)), false)
 	bankCountGlobal := llvm.AddGlobal(c.mod, bankCountConst.Type(), "rom_chr_bank_count")
 	bankCountGlobal.SetLinkage(llvm.ExternalLinkage)
 	bankCountGlobal.SetInitializer(bankCountConst)
 	bankCountGlobal.SetGlobalConstant(true)
+	c.glob = bankCountGlobal
 
 	//uint8_t* rom_chr_data;
 	dataLen := 0x2000 * len(chrRom)
@@ -1660,12 +1663,45 @@ func (c *Compilation) declareWriteFn(name string) llvm.Value {
 	return fn
 }
 
+func (c *Compilation) declareStartFn() llvm.Value{
+	// declare i32 @putchar(i32)
+	// bytePointerType := llvm.PointerType(llvm.Int8Type(), 0)
+	// i8Type := llvm.Int8Type()
+	// setBtnStateType := llvm.FunctionType(llvm.VoidType(), []llvm.Type{i8Type, i8Type, i8Type}, false)
+	// readMemType := llvm.FunctionType(llvm.Int8Type(), []llvm.Type{llvm.Int16Type()}, false)
+	// readChrType := llvm.FunctionType(llvm.VoidType(), []llvm.Type{bytePointerType}, false)
+	// mainType := llvm.FunctionType(llvm.VoidType(), []llvm.Type{llvm.Int8Type()}, false)
+
+	PointerType := llvm.PointerType(llvm.Int64Type(), 0)
+
+	
+	// startType := llvm.FunctionType(llvm.VoidType(), []llvm.Type{
+	// 	setBtnStateType,
+	// 	readMemType,
+	// 	readChrType,
+	// 	mainType}, false)
+
+	startType := llvm.FunctionType(llvm.VoidType(), []llvm.Type{
+		PointerType,
+		PointerType,
+		PointerType,
+		PointerType}, false)
+
+	//startType := llvm.FunctionType(llvm.VoidType(), []llvm.Type{}, false)
+
+	c.startFn = llvm.AddFunction(c.mod, "mainentry", startType)
+	c.startFn.SetLinkage(llvm.ExternalLinkage)
+	return c.startFn
+}
+
 func (c *Compilation) createFunctionDeclares() {
 	// declare void @memcpy(void* dest, void* source, i32 size)
 	bytePointerType := llvm.PointerType(llvm.Int8Type(), 0)
 	memcpyType := llvm.FunctionType(llvm.VoidType(), []llvm.Type{bytePointerType, bytePointerType, llvm.Int32Type()}, false)
 	c.memcpyFn = llvm.AddFunction(c.mod, "memcpy", memcpyType)
 	c.memcpyFn.SetLinkage(llvm.ExternalLinkage)
+
+	c.declareStartFn()
 
 	// declare i32 @putchar(i32)
 	putCharType := llvm.FunctionType(llvm.Int32Type(), []llvm.Type{llvm.Int32Type()}, false)
@@ -1932,6 +1968,47 @@ func (c *Compilation) createPadReadFn() {
 	// }
 }
 
+func (c *Compilation) createInitializeFunction(engine llvm.ExecutionEngine) {
+	// uint8_t rom_ram_read(uint16_t addr)
+	initializeType := llvm.FunctionType(llvm.VoidType(), []llvm.Type{}, false)
+	c.initializeFn = llvm.AddFunction(c.mod, "initialize", initializeType)
+
+	entry := llvm.AddBasicBlock(c.initializeFn, "Entry")
+	c.selectBlock(entry)
+
+	// setButtonPointer := llvm.LLVMGetPointerToGlobal(engine.FindFunction("rom_set_button_state"))
+	// ramReadPointer := llvm.LLVMGetPointerToGlobal(engine.FindFunction("rom_ram_read")) 
+	// readChrPointer := llvm.LLVMGetPointerToGlobal(engine.FindFunction("rom_read_chr"))
+	// startPointer := llvm.LLVMGetPointerToGlobal(c.mainFn)
+
+
+
+	// args := []llvm.Value{
+	// 	llvm.ConstInt(llvm.Int32Type(),
+	// 		uint64(uintptr(engine.FindFunction("rom_set_button_state").Pointer())),
+	// 		false),
+	// 	llvm.ConstInt(llvm.Int32Type(),
+	// 		uint64(uintptr(engine.FindFunction("rom_ram_read").Pointer() )),
+	// 		false),
+	// 	llvm.ConstInt(llvm.Int32Type(),
+	// 		uint64(uintptr(engine.FindFunction("rom_read_chr").Pointer())),
+	// 		false),
+	// 	llvm.ConstInt(llvm.Int32Type(),
+	// 		uint64(uintptr(engine.PointerToGlobal(c.mainFn).Pointer())),
+	// 		false) }
+
+	args := []llvm.Value{
+		engine.FindFunction("rom_set_button_state"),
+		engine.FindFunction("rom_ram_read"),
+		engine.FindFunction("rom_read_chr"),
+		engine.FindFunction("rom_start")}
+
+	//args := []llvm.Value{}
+
+	c.builder.CreateCall(c.startFn, args, "")
+	c.builder.CreateRetVoid()
+}
+
 func (c *Compilation) createReadMemFn() {
 	// uint8_t rom_ram_read(uint16_t addr)
 	readMemType := llvm.FunctionType(llvm.Int8Type(), []llvm.Type{llvm.Int16Type()}, false)
@@ -2115,6 +2192,7 @@ func (j *Jitter) CompileToFile(file *os.File, flags CompileFlags) (*Compilation,
 	c.wram.SetLinkage(llvm.PrivateLinkage)
 	c.wram.SetInitializer(llvm.ConstNull(memType))
 
+	fmt.Printf("rom_mirroring: %v", j.rom.Mirroring)
 	//uint8_t rom_mirroring;
 	mirroringConst := llvm.ConstInt(llvm.Int8Type(), uint64(j.rom.Mirroring), false)
 	mirroringGlobal := llvm.AddGlobal(c.mod, mirroringConst.Type(), "rom_mirroring")
@@ -2159,7 +2237,7 @@ func (j *Jitter) CompileToFile(file *os.File, flags CompileFlags) (*Compilation,
 
 	c.createReadMemFn()
 
-	fmt.Printf("past visit")
+	fmt.Printf("past visit\n")
 
 	// hook up entry points
 	if c.nmiBlock == nil {
@@ -2192,6 +2270,8 @@ func (j *Jitter) CompileToFile(file *os.File, flags CompileFlags) (*Compilation,
 	c.addNmiInterruptCode()
 	c.addResetInterruptCode()
 
+	fmt.Printf("hello")
+
 	// if flags&DumpModulePreFlag != 0 {
 	// 	c.mod.Dump()
 	// }
@@ -2203,6 +2283,9 @@ func (j *Jitter) CompileToFile(file *os.File, flags CompileFlags) (*Compilation,
 
 	fmt.Printf("dump the")
 	//c.mod.Dump()
+	llvm.InitializeNativeTarget()
+	llvm.InitializeNativeAsmPrinter()
+	//llvm.InitializeNativeAsmParser()
 	options := llvm.NewMCJITCompilerOptions()
 	options.SetMCJITOptimizationLevel(0)
 	engine, err := llvm.NewMCJITCompiler(c.mod, options)
@@ -2211,6 +2294,8 @@ func (j *Jitter) CompileToFile(file *os.File, flags CompileFlags) (*Compilation,
 		return c, nil
 	}
 	defer engine.Dispose()
+
+	c.createInitializeFunction(engine);
 
 	//if flags&DisableOptFlag == 0 {
 	if false {
@@ -2232,6 +2317,10 @@ func (j *Jitter) CompileToFile(file *os.File, flags CompileFlags) (*Compilation,
 	// if true {
 	// 	c.mod.Dump()
 	// }
+	fmt.Printf("RUn the function")
+	engine.GenerateCodeForModule(c.mod)
+	engine.PointerToGlobal(c.glob)
+	engine.RunFunction(c.initializeFn, []llvm.GenericValue{})
 
 	err = llvm.WriteBitcodeToFile(c.mod, file)
 

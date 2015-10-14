@@ -15,14 +15,19 @@ func main(){
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		os.Exit(1)
 	}
-	//j,_ := rom.Jit()
+	//j, _ := rom.Jit()
 	//j.Print();
 
-	// c, err := j.CompileToFilename("test")
+	// var flags jamulator.CompileFlags
+	// c, err := j.CompileToFilename("test",flags)
 	// fmt.Printf("errs: %v %v",err,c.Errors)
 	// fmt.Printf("jumpcount: %v",j.JumpCount)
 
 	var flags jamulator.CompileFlags
 	//flags |= jamulator.IncludeDebugFlag
-	rom.RecompileToBinary(filename+"x",flags)
+	err = rom.RecompileToBinary(filename+"x",flags)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		os.Exit(1)
+	}
 }

@@ -754,3 +754,20 @@ void Ppu_sprPaletteEntry(Ppu* p, unsigned int a, uint8_t* dest) {
         break;
     }
 }
+
+
+
+// // write the chr rom into dest
+// void rom_read_chr(uint8_t* dest){};
+
+// // starts executing the PRG ROM.
+// // this function returns when the RTI instruction is executed,
+// // or the program exits.
+// // when an interrupt occurs, call rom_start with the interrupt
+// // index.
+// void rom_start(uint8_t interrupt){};
+// // controller
+// void rom_set_button_state(uint8_t padIndex, uint8_t buttonIndex, uint8_t value){};
+
+// // RAM
+// uint8_t rom_ram_read(uint16_t addr){};

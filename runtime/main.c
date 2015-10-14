@@ -33,6 +33,12 @@ static uint64_t movieFrameCount;
 static uint64_t frameIndex = 0;
 static uint64_t cycleIndex = 0;
 
+
+rom_set_button_state_func rom_set_button_state;
+rom_ram_read_func rom_ram_read;
+rom_read_chr_func rom_read_chr;
+rom_start_func rom_start;
+
 void loadMovie() {
     if (movieFilename == NULL) return;
     FILE *fd = fopen(movieFilename, "rb");
@@ -174,19 +180,25 @@ void reshape_video(int width, int height) {
 }
 
 void init_video() {
+    printf("init video\n");
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) != 0) {
         fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
         exit(1);
     }
 
+    printf("init video 1\n");
     SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, !fast); // vsync
+    printf("init video 1.5 %s\n", SDL_GetError());
+    //SDL_SWSURFACE gets us past here
     v.screen = SDL_SetVideoMode(512, 480, 32, SDL_OPENGL|SDL_RESIZABLE);
+    printf("init_video 1.6\n");
 
     if (v.screen == NULL) {
         fprintf(stderr, "Unable to set SDL video mode: %s\n", SDL_GetError());
         exit(1);
     }
 
+    printf("init video 2 \n");
     SDL_WM_SetCaption("jamulator", NULL);
 
     if (glewInit() != 0) {
@@ -194,11 +206,13 @@ void init_video() {
         exit(1);
     }
 
+    printf("init video 3\n");
     glEnable(GL_TEXTURE_2D);
     reshape_video(v.screen->w, v.screen->h);
     v.pendingResize = false;
 
     glGenTextures(1, &v.tex);
+    printf("init video 5\n");
 }
 
 void vblankInterrupt() {
@@ -272,20 +286,59 @@ void parseFlags(int argc, char* argv[]) {
     }
 }
 
-int main(int argc, char* argv[]) {
-    parseFlags(argc, argv);
+// int mainentry(int argc, char* argv[]) {
+//     parseFlags(argc, argv);
+//     loadMovie();
+//     p = Ppu_new();
+//     p->render = &render;
+//     p->vblankInterrupt = &vblankInterrupt;
+//     p->readRam = &rom_ram_read;
+//     Nametable_setMirroring(&p->nametables, rom_mirroring);
+//     assert(rom_chr_bank_count == 1);
+//     rom_read_chr(p->vram);
+//     init_video();
+//     rom_start(ROM_INTERRUPT_RESET);
+//     Ppu_dispose(p);
+// }
+
+void mainentry(rom_set_button_state_func set_button,
+    rom_ram_read_func ram_read,
+    rom_read_chr_func read_chr,
+    rom_start_func start
+    ) {
+
+    printf("in main?\n");
+    rom_chr_bank_count = 1;
+    rom_mirroring = 0;
+
+    printf("in main %i \n",set_button);
+    printf("in main %i \n",ram_read);
+    rom_set_button_state = set_button;
+    rom_ram_read = ram_read;
+    rom_read_chr = read_chr;
+    rom_start = start;
+    //parseFlags(argc, argv);
     loadMovie();
+    printf("after movie a char\n");
     p = Ppu_new();
+    printf("after ppu a char\n");
     p->render = &render;
     p->vblankInterrupt = &vblankInterrupt;
-    p->readRam = &rom_ram_read;
+    p->readRam = rom_ram_read;
+    printf("before mirrong a char\n");
     Nametable_setMirroring(&p->nametables, rom_mirroring);
+    printf("after mirroring a char\n");
     assert(rom_chr_bank_count == 1);
     rom_read_chr(p->vram);
+    printf("read a char\n");
     init_video();
+    printf("call rom start\n");
     rom_start(ROM_INTERRUPT_RESET);
+    printf("after rom start \n");
     Ppu_dispose(p);
+    printf("end main");
 }
+
 
 uint8_t rom_ppu_read_status() {
     return Ppu_readStatus(p);

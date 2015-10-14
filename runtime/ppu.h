@@ -1,3 +1,6 @@
+#ifndef PPU_H
+#define PPU_H
+
 #include "stdbool.h"
 #include "stdint.h"
 #include "nametable.h"
@@ -135,3 +138,6 @@ void Ppu_fetchTileAttributes(Ppu* p, PpuTileAttributes* attrs);
 void Ppu_sprPaletteEntry(Ppu* p, unsigned int a, uint8_t* dest);
 void Ppu_evaluateScanlineSprites(Ppu* p, int line);
 void Ppu_decodePatternTile(Ppu* p, uint8_t t0, uint8_t t1, int x, int y, uint8_t* pal, uint8_t* attr, bool spZero, int index);
+
+#endif
+

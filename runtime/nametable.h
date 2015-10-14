@@ -1,3 +1,6 @@
+#ifndef NAMETABLE_H
+#define NAMETABLE_H
+
 #include "stdint.h"
 
 typedef struct {
@@ -10,3 +13,5 @@ typedef struct {
 void Nametable_writeNametableData(Nametable* n, int a, uint8_t v);
 uint8_t Nametable_readNametableData(Nametable* n, int a);
 void Nametable_setMirroring(Nametable* n, int m);
+
+#endif
