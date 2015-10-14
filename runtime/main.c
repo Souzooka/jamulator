@@ -198,11 +198,18 @@ void init_video() {
         exit(1);
     }
 
+    const SDL_VideoInfo* info = SDL_GetVideoInfo( );
+    if( !info ) {
+        /* This should probably never happen. */
+        fprintf( stderr, "Video query failed: %s\n",
+             SDL_GetError( ) );
+    }
+
     printf("init video 2 \n");
     SDL_WM_SetCaption("jamulator", NULL);
 
     if (glewInit() != 0) {
-        fprintf(stderr, "Unable to init glew\n");
+        fprintf(stderr, "Unable to init glew: \n");
         exit(1);
     }
 

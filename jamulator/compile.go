@@ -2142,6 +2142,7 @@ func (p *Program) CompileToFile(file *os.File, flags CompileFlags) (*Compilation
 	}
 	defer engine.Dispose()
 
+
 	if flags&DisableOptFlag == 0 {
 		pass := llvm.NewPassManager()
 		defer pass.Dispose()
@@ -2172,6 +2173,11 @@ func (p *Program) CompileToFile(file *os.File, flags CompileFlags) (*Compilation
 
 func (j *Jitter) CompileToFile(file *os.File, flags CompileFlags) (*Compilation, error) {
 	llvm.InitializeNativeTarget()
+	llvm.LoadLibraryPermanently("runtime/runtime.so")
+	llvm.LoadLibraryPermanently("/usr/lib/x86_64-linux-gnu/libGLEW.so")
+	llvm.LoadLibraryPermanently("/usr/lib/x86_64-linux-gnu/libGL.so")
+	llvm.LoadLibraryPermanently("/usr/lib/x86_64-linux-gnu/libSDL.so")
+	llvm.LoadLibraryPermanently("/usr/lib/x86_64-linux-gnu/libSDL_gfx.so")
 
 	c := new(Compilation)
 	c.Flags = flags
@@ -2320,6 +2326,7 @@ func (j *Jitter) CompileToFile(file *os.File, flags CompileFlags) (*Compilation,
 	fmt.Printf("RUn the function")
 	engine.GenerateCodeForModule(c.mod)
 	engine.PointerToGlobal(c.glob)
+
 	engine.RunFunction(c.initializeFn, []llvm.GenericValue{})
 
 	err = llvm.WriteBitcodeToFile(c.mod, file)

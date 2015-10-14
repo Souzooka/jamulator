@@ -22,14 +22,15 @@ test:
 
 runtime/runtime.a: runtime/main.o runtime/ppu.o runtime/nametable.o
 	ar rcs runtime/runtime.a runtime/main.o runtime/ppu.o runtime/nametable.o
+	clang -shared -o runtime/runtime.so runtime/main.o runtime/ppu.o runtime/nametable.o
 
 runtime/main.o: runtime/main.c
-	clang -o runtime/main.o -c runtime/main.c
+	clang -fPIC -o runtime/main.o -c runtime/main.c
 
 runtime/ppu.o: runtime/ppu.c
-	clang -o runtime/ppu.o -c runtime/ppu.c
+	clang -fPIC -o runtime/ppu.o -c runtime/ppu.c
 
 runtime/nametable.o: runtime/nametable.c
-	clang -o runtime/nametable.o -c runtime/nametable.c
+	clang -fPIC -o runtime/nametable.o -c runtime/nametable.c
 
 .PHONY: build clean dev test

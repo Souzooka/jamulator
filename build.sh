@@ -3,4 +3,4 @@ export CGO_LDFLAGS="`llvm-config-3.6  --ldflags --libs --system-libs all` runtim
 export CGO_CXXFLAGS=-std=c++11
 make runtime/runtime.a
 cp -r runtime/ ../../../llvm.org/svn/llvm-project/llvm/branches/release_36/bindings/go/llvm.svn/
-go run -tags byollvm test.go smb.nes
+go build -tags byollvm test.go
