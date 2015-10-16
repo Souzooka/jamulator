@@ -105,7 +105,6 @@ void setPadStateFromMovie() {
 
 void flush_events() {
     SDL_Event event;
-
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
         case SDL_VIDEORESIZE:
@@ -125,7 +124,7 @@ void flush_events() {
     }
 }
 
-void step(uint8_t cycles) {
+void step_renamed(uint8_t cycles) {
     cycleIndex += cycles;
     for (int i = 0; i < 3 * cycles; ++i) {
         Ppu_step(p);
@@ -135,7 +134,7 @@ void step(uint8_t cycles) {
 void rom_cycle(uint8_t cycles) {
     flush_events();
     setPadStateFromMovie();
-    step(cycles);
+    step_renamed(cycles);
     int req = interruptRequested;
     if (req != ROM_INTERRUPT_NONE) {
         interruptRequested = ROM_INTERRUPT_NONE;
@@ -180,18 +179,14 @@ void reshape_video(int width, int height) {
 }
 
 void init_video() {
-    printf("init video\n");
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) != 0) {
         fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
         exit(1);
     }
 
-    printf("init video 1\n");
     SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, !fast); // vsync
-    printf("init video 1.5 %s\n", SDL_GetError());
     //SDL_SWSURFACE gets us past here
     v.screen = SDL_SetVideoMode(512, 480, 32, SDL_OPENGL|SDL_RESIZABLE);
-    printf("init_video 1.6\n");
 
     if (v.screen == NULL) {
         fprintf(stderr, "Unable to set SDL video mode: %s\n", SDL_GetError());
@@ -205,7 +200,6 @@ void init_video() {
              SDL_GetError( ) );
     }
 
-    printf("init video 2 \n");
     SDL_WM_SetCaption("jamulator", NULL);
 
     if (glewInit() != 0) {
@@ -213,13 +207,11 @@ void init_video() {
         exit(1);
     }
 
-    printf("init video 3\n");
     glEnable(GL_TEXTURE_2D);
     reshape_video(v.screen->w, v.screen->h);
     v.pendingResize = false;
 
     glGenTextures(1, &v.tex);
-    printf("init video 5\n");
 }
 
 void vblankInterrupt() {
@@ -295,6 +287,8 @@ void parseFlags(int argc, char* argv[]) {
 
 // int mainentry(int argc, char* argv[]) {
 //     parseFlags(argc, argv);
+
+
 //     loadMovie();
 //     p = Ppu_new();
 //     p->render = &render;
@@ -389,9 +383,9 @@ void rom_ppu_write_dma(uint8_t b) {
     Ppu_writeDma(p, b);
 
     // Halt the CPU for 512 cycles
-    step(255);
-    step(255);
-    step(2);
+    step_renamed(255);
+    step_renamed(255);
+    step_renamed(2);
 }
 
 uint8_t rom_apu_read_status() {

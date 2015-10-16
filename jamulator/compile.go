@@ -1805,6 +1805,10 @@ func (c *Compilation) addResetInterruptCode() {
 	c.builder.CreateStore(bit1, c.rSInt)
 	c.builder.CreateStore(bit0, c.rSZero)
 	c.builder.CreateStore(bit0, c.rSCarry)
+
+	//c.builder.SetInsertPointBefore(c.mainBlock.FirstInstruction())
+	//c.builder.CreateBr(*c.resetBlock)
+
 }
 
 func (c *Compilation) addDynJumpTable() {
@@ -2324,7 +2328,7 @@ func (j *Jitter) CompileToFile(file *os.File, flags CompileFlags) (*Compilation,
 	// 	c.mod.Dump()
 	// }
 	fmt.Printf("RUn the function")
-	engine.GenerateCodeForModule(c.mod)
+	//engine.GenerateCodeForModule(c.mod)
 	engine.PointerToGlobal(c.glob)
 
 	engine.RunFunction(c.initializeFn, []llvm.GenericValue{})
