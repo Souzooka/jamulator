@@ -61,7 +61,7 @@ func usageAndQuit() {
 	os.Exit(1)
 }
 
-/** Function removeExtension()
+/** Function removeExtension(filename string) string
   * Parameters:
   *   String filename
   * Return values:
@@ -74,7 +74,7 @@ func removeExtension(filename string) string {
 	return filename[0 : len(filename)-len(path.Ext(filename))]
 }
 
-/** Function compileFlags()
+/** Function compileFlags() (flags jamulator.CompileFlags)
   * Parameters:
   *   Void
   * Return values:
@@ -98,7 +98,7 @@ func compileFlags() (flags jamulator.CompileFlags) {
 	return
 }
 
-/** Function compile()
+/** Function compile(filename string, program *jamulator.Program)
   * Parameters:
   *   String filename
   *   Program ptr jamulator.Program

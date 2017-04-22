@@ -36,38 +36,128 @@ type symbolGetter interface {
 	getSymbol(string, int) (int, bool)
 }
 
+/** Function GetPayload()
+  * Receiver:
+  *   i *Instruction (./asm6502.y)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   byte array i.Payload
+  * Behavior:
+  *   Getter Function
+  */
 func (i *Instruction) GetPayload() []byte {
 	return i.Payload
 }
 
+/** Function GetLine()
+  * Receiver:
+  *   i *Instruction (./asm6502.y)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   int i.Line
+  * Behavior:
+  *   Getter Function
+  */
 func (i *Instruction) GetLine() int {
 	return i.Line
 }
 
+/** Function (i *Instruction) GetOffset() int
+  * Receiver:
+  *   i *Instruction (./asm6502.y)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   int i.Offset
+  * Behavior:
+  *   Getter Function
+  */
 func (i *Instruction) GetOffset() int {
 	return i.Offset
 }
 
+/** Function (i *Instruction) SetOffset(offset int)
+  * Receiver:
+  *   i *Instruction (./asm6502.y)
+  * Parameters:
+  *   int offset
+  * Return values:
+  *   Void
+  * Behavior:
+  *   Setter Function
+  */
 func (i *Instruction) SetOffset(offset int) {
 	i.Offset = offset
 }
 
+/** Function (s *DataStatement) GetPayload() []byte
+  * Receiver:
+  *   s *DataStatement (./asm6502.y)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   byte array s.Payload
+  * Behavior:
+  *   Getter Function
+  */
 func (s *DataStatement) GetPayload() []byte {
 	return s.Payload
 }
 
+/** Function (s *DataStatement) GetLine() []byte
+  * Receiver:
+  *   s *DataStatement (./asm6502.y)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   int s.Line
+  * Behavior:
+  *   Getter Function
+  */
 func (s *DataStatement) GetLine() int {
 	return s.Line
 }
 
+/** Function (s *DataStatement) GetOffset() int
+  * Receiver:
+  *   s *DataStatement (./asm6502.y)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   int s.Offset
+  * Behavior:
+  *   Getter Function
+  */
 func (s *DataStatement) GetOffset() int {
 	return s.Offset
 }
 
+/** Function (s *DataStatement) SetOffset(offset int)
+  * Receiver:
+  *   s *DataStatement (./asm6502.y)
+  * Parameters:
+  *   int offset
+  * Return values:
+  *   Void
+  * Behavior:
+  *   Setter Function
+  */
 func (s *DataStatement) SetOffset(offset int) {
 	s.Offset = offset
 }
 
+/** Function (p *Program) getSymbol(name string, offset int) (int, bool)
+  * Receiver:
+  *   p *Program (./assembly.go)
+  * Parameters:
+  *   string name, int offset
+  * Return values:
+  *   int value, bool ok
+  * Behavior:
+  *   Getter Function (DOCUMENTATION TODO)
+  */
 func (p *Program) getSymbol(name string, offset int) (int, bool) {
 	if name == "." {
 		return offset, true
@@ -81,7 +171,24 @@ func (p *Program) getSymbol(name string, offset int) (int, bool) {
 	return value, ok
 }
 
+/** Function (i *Instruction) Resolve() error
+  * Receiver:
+  *   i *Instruction (./asm6502.y)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   error object
+  *   └─if error occurs
+  *
+  *   OR
+  *
+  *   nil
+  *   └─if no error occurs
+  * Behavior:
+  *   Error handler (DOCUMENTATION TODO -- which errors and how are they evaluated?)
+  */
 // computes OpCode, Payload, and Size
+// TODO: Split function up into smaller error handlers
 func (i *Instruction) Resolve() error {
 	var ok bool
 	lowerOpName := strings.ToLower(i.OpName)
@@ -234,6 +341,21 @@ func (i *Instruction) Resolve() error {
 	return nil
 }
 
+/** Function (i *Instruction) Assemble(sg symbolGetter) error
+  * Receiver:
+  *   i *Instruction (./asm6502.y)
+  * Parameters:
+  *   sg (type) symbolGetter
+  * Return values:
+  *   (DOCUMENTATION TODO)
+  *   error object
+  *
+  *   OR
+  *
+  *   nil
+  * Behavior:
+  *   DOCUMENTATION TODO)
+  */
 func (i *Instruction) Assemble(sg symbolGetter) error {
 	// fill in the rest of the payload
 	var ok bool
@@ -275,6 +397,22 @@ func (i *Instruction) Assemble(sg symbolGetter) error {
 	return nil
 }
 
+/** Function (s *DataStatement) Resolve() error
+  * Receiver:
+  *   s *DataStatement (./asm6502.y)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   error object
+  *   └─if error occurs
+  *
+  *   OR
+  *
+  *   nil
+  *   └─if no error occurs
+  * Behavior:
+  *   Error handler (DOCUMENTATION TODO -- which errors and how are they evaluated?)
+  */
 func (s *DataStatement) Resolve() error {
 	size := 0
 	for e := s.dataList.Front(); e != nil; e = e.Next() {
@@ -317,6 +455,22 @@ func (s *DataStatement) Resolve() error {
 	return nil
 }
 
+/** Function (s *DataStatement) Assemble(sg symbolGetter) error
+  * Receiver:
+  *   s *DataStatement (./asm6502.y)
+  * Parameters:
+  *   sg (type) symbolGetter
+  * Return values:
+  *   error object
+  *   └─if error occurs
+  *
+  *   OR
+  *
+  *   nil
+  *   └─if no error occurs
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (s *DataStatement) Assemble(sg symbolGetter) error {
 	offset := 0
 	for e := s.dataList.Front(); e != nil; e = e.Next() {
@@ -359,6 +513,22 @@ func (s *DataStatement) Assemble(sg symbolGetter) error {
 	return nil
 }
 
+/** Function (p *Program) AssembleToFile(filename string) error
+  * Receiver:
+  *   p *Program (./assembly.go)
+  * Parameters:
+  *   w (type) io.Writer
+  * Return values:
+  *   error object
+  *   └─if error occurs
+  *
+  *   OR
+  *
+  *   nil
+  *   └─if no error occurs
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (p *Program) Assemble(w io.Writer) error {
 	writer := bufio.NewWriter(w)
 
@@ -405,6 +575,22 @@ func (p *Program) Assemble(w io.Writer) error {
 	return nil
 }
 
+/** Function (p *Program) AssembleToFile(filename string) error
+  * Receiver:
+  *   p *Program (./assembly.go)
+  * Parameters:
+  *   string filename
+  * Return values:
+  *   error object
+  *   └─if error occurs
+  *
+  *   OR
+  *
+  *   nil
+  *   └─if no error occurs
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (p *Program) AssembleToFile(filename string) error {
 	fd, err := os.Create(filename)
 	if err != nil {
@@ -423,6 +609,16 @@ func (p *Program) AssembleToFile(filename string) error {
 	return nil
 }
 
+/** Function (ast ProgramAst) ExpandLabeledStatements()
+  * Receiver:
+  *   ast ProgramAst (./asm6502.y)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (ast ProgramAst) ExpandLabeledStatements() {
 	for e := ast.List.Front(); e != nil; e = e.Next() {
 		s, ok := e.Value.(*LabeledStatement)
@@ -435,6 +631,16 @@ func (ast ProgramAst) ExpandLabeledStatements() {
 	}
 }
 
+/** Function (p *Program) Resolve()
+  * Receiver:
+  *   p *Program (./assembly.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   Error handler (DOCUMENTATION TODO -- which errors and how are they evaluated?)
+  */
 func (p *Program) Resolve() {
 	offset := 0
 	for e := p.List.Front(); e != nil; e = e.Next() {
@@ -475,6 +681,16 @@ func (p *Program) Resolve() {
 	}
 }
 
+/** Function (ast ProgramAst) ToProgram() (p *Program)
+  * Receiver:
+  *   ast ProgramAst (./asm6502.y)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   p *Program (??)
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (ast ProgramAst) ToProgram() (p *Program) {
 	ast.ExpandLabeledStatements()
 	p = &Program{

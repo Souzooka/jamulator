@@ -12,6 +12,7 @@ type testAsm struct {
 	expectedOutFile string
 }
 
+// Declare ROMS for testing
 var testAsmList = []testAsm{
 	{
 		"test/suite6502.asm",
@@ -27,12 +28,21 @@ var testAsmList = []testAsm{
 	},
 }
 
+// Declare ROMS for testing
 var testDisAsmList = []string{
 	"test/suite6502.bin.ref",
 	"test/zelda.bin.ref",
 	"test/hello.bin.ref",
 }
 
+/** Function TestAsm(t *testing.T)
+  * Parameters:
+  *   t (DOCUMENTATION TODO) ptr testing.T
+  * Return values:
+  *   Void
+  * Behavior:
+  *   DOCUMENTATION TODO
+  */
 func TestAsm(t *testing.T) {
 	for _, ta := range testAsmList {
 		expected, err := ioutil.ReadFile(ta.expectedOutFile)
@@ -58,6 +68,14 @@ func TestAsm(t *testing.T) {
 	}
 }
 
+/** Function TestDisassembly(t *testing.T)
+  * Parameters:
+  *   t (DOCUMENTATION TODO) ptr testing.T
+  * Return values:
+  *   Void
+  * Behavior:
+  *   DOCUMENTATION TODO
+  */
 func TestDisassembly(t *testing.T) {
 	// try disassembling the ref and reassembling it, it should match byte for byte
 	for _, binfile := range testDisAsmList {

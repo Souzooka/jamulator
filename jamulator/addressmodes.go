@@ -317,6 +317,14 @@ var opCodeDataMap = []opCodeData{
 	{"", nilAddr},
 }
 
+/** Function init()
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   DOCUMENTATION TODO
+  */
 func init() {
 	for i := 0; i < int(addrModeCount); i++ {
 		opNameToOpCode[i] = make(map[string]byte)
