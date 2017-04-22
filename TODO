@@ -1,3 +1,5 @@
+* Write comprehensive documentation for existing code
+
 * disassembler: detect the pacman-style jump table. (another example in nestest.nes)
 * make SMB1 work
 * get rid of jamfile; use .ines* declarations

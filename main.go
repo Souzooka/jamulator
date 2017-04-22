@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// Variable declaration
 var (
 	astFlag         bool
 	assembleFlag    bool
@@ -23,6 +24,14 @@ var (
 	recompileFlag   bool
 )
 
+/** Function init()
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   DOCUMENTATION TODO
+  */
 // TODO: change this to use commands
 func init() {
 	flag.BoolVar(&astFlag, "ast", false, "Print the abstract syntax tree and quit")
@@ -38,16 +47,41 @@ func init() {
 	flag.BoolVar(&recompileFlag, "recompile", false, "Recompile an NES ROM into a native binary")
 }
 
+/** Function usageAndQuit()
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   DOCUMENTATION TODO
+  */
 func usageAndQuit() {
 	fmt.Fprintf(os.Stderr, "Usage: %s [options] inputfile [outputfile]\n", os.Args[0])
 	flag.PrintDefaults()
 	os.Exit(1)
 }
 
+/** Function removeExtension()
+  * Parameters:
+  *   String filename
+  * Return values:
+  *   String
+  *   └─filename with its file extension removed.
+  * Behavior:
+  *   Returns a substr of filename with the extension omitted.
+  */
 func removeExtension(filename string) string {
 	return filename[0 : len(filename)-len(path.Ext(filename))]
 }
 
+/** Function compileFlags()
+  * Parameters:
+  *   Void
+  * Return values:
+  *   flags jamulator.CompileFlags (DOCUMENTATION TODO)
+  * Behavior:
+  *   DOCUMENTATION TODO
+  */
 func compileFlags() (flags jamulator.CompileFlags) {
 	if disableOptFlag {
 		flags |= jamulator.DisableOptFlag
@@ -64,6 +98,15 @@ func compileFlags() (flags jamulator.CompileFlags) {
 	return
 }
 
+/** Function compile()
+  * Parameters:
+  *   String filename
+  *   Program ptr jamulator.Program
+  * Return values:
+  *   Void
+  * Behavior:
+  *   DOCUMENTATION TODO
+  */
 func compile(filename string, program *jamulator.Program) {
 	outfile := removeExtension(filename) + ".bc"
 	if flag.NArg() == 2 {
@@ -83,6 +126,15 @@ func compile(filename string, program *jamulator.Program) {
 	}
 }
 
+/** Function main()
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void (implicit 0 for Go?)
+  * Behavior:
+  *   DOCUMENTATION TODO
+  */
+// TODO: This is a really large function, look into splicing code out into smaller functions.
 func main() {
 	flag.Parse()
 	if flag.NArg() != 1 && flag.NArg() != 2 {
