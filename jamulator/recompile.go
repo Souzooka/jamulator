@@ -10,6 +10,20 @@ import (
 	"strings"
 )
 
+/** Function (rom *Rom) RecompileToBinary(filename string, flags CompileFlags) error
+  * Receiver:
+  *   rom *Rom
+  * Parameters:
+  *   string filename, CompileFlags flags
+  * Return values:
+  *   error
+  *
+  *   OR
+  *
+  *   nil
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (rom *Rom) RecompileToBinary(filename string, flags CompileFlags) error {
 	if len(rom.PrgRom) != 1 && len(rom.PrgRom) != 2 {
 		return errors.New("only roms with 1-2 prg rom banks are supported")

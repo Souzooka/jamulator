@@ -13,6 +13,20 @@ import (
 	"strings"
 )
 
+/** Function (r *Rom) disassembleToDirWithJam(dest string, jamFd io.Writer) error
+  * Receiver:
+  *   r *Rom (./rom.go)
+  * Parameters:
+  *   string dest, io.Writer jamFd
+  * Return values:
+  *   Error
+  *
+  *   OR
+  *
+  *   nil
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (r *Rom) disassembleToDirWithJam(dest string, jamFd io.Writer) error {
 	jam := bufio.NewWriter(jamFd)
 
@@ -76,6 +90,20 @@ func (r *Rom) disassembleToDirWithJam(dest string, jamFd io.Writer) error {
 	return nil
 }
 
+/** Function (r *Rom) DisassembleToDir(dest string) error
+  * Receiver:
+  *   r *Rom (./rom.go)
+  * Parameters:
+  *   string dest
+  * Return values:
+  *   Error
+  *
+  *   OR
+  *
+  *   nil
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (r *Rom) DisassembleToDir(dest string) error {
 	// create the folder
 	err := os.Mkdir(dest, 0770)
@@ -104,10 +132,28 @@ func (r *Rom) DisassembleToDir(dest string) error {
 	return nil
 }
 
+/** Function removeExtension(filename string) string
+  * Parameters:
+  *   string filename
+  * Return values:
+  *   string
+  *   └─This string is a substr of filename, with the extension removed.
+  *
+  * Behavior:
+  *   Slices the end of the filename string and returns the string without a filename.
+  */
 func removeExtension(filename string) string {
 	return filename[0 : len(filename)-len(path.Ext(filename))]
 }
 
+/** Function AssembleRom(dir string, ioreader io.Reader) (*Rom, error)
+  * Parameters:
+  *   string dir, io.Reader ioreader
+  * Return values:
+  *   (*Rom, error)
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func AssembleRom(dir string, ioreader io.Reader) (*Rom, error) {
 	reader := bufio.NewReader(ioreader)
 	r := new(Rom)
@@ -224,6 +270,14 @@ func AssembleRom(dir string, ioreader io.Reader) (*Rom, error) {
 	return r, nil
 }
 
+/** Function AssembleRomFile(filename string) (*Rom, error)
+  * Parameters:
+  *   string filename
+  * Return values:
+  *   (*Rom, error)
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func AssembleRomFile(filename string) (*Rom, error) {
 	fd, err := os.Open(filename)
 	if err != nil {

@@ -16,6 +16,20 @@ const (
 
 type TvSystem int
 
+/** Function (rom *Rom) RecompileToBinary(filename string, flags CompileFlags) error
+  * Receiver:
+  *   tvs TvSystem
+  * Parameters:
+  *   Void
+  * Return values:
+  *   error
+  *
+  *   OR
+  *
+  *   nil
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (tvs TvSystem) String() string {
 	if tvs == NtscTv {
 		return "NTSC"
@@ -54,6 +68,14 @@ type Rom struct {
 	SRamPresent   bool
 }
 
+/** Function Load(ioreader io.Reader) (*Rom, error)
+  * Parameters:
+  *   io.Reader ioreader
+  * Return values:
+  *   (*Rom, error)
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func Load(ioreader io.Reader) (*Rom, error) {
 	reader := bufio.NewReader(ioreader)
 	r := new(Rom)
@@ -139,6 +161,14 @@ func Load(ioreader io.Reader) (*Rom, error) {
 	return r, nil
 }
 
+/** Function LoadFile(filename string) (*Rom, error)
+  * Parameters:
+  *   string filename
+  * Return values:
+  *   (*Rom, error)
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func LoadFile(filename string) (*Rom, error) {
 	fd, err := os.Open(filename)
 	if err != nil {
@@ -158,6 +188,20 @@ func LoadFile(filename string) (*Rom, error) {
 	return r, nil
 }
 
+/** Function (r *Rom) Save(writer io.Writer) error
+  * Receiver:
+  *   *Rom r
+  * Parameters:
+  *   io.Writer writer
+  * Return values:
+  *   error
+  *
+  *   OR
+  *
+  *   nil
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (r *Rom) Save(writer io.Writer) error {
 	w := bufio.NewWriter(writer)
 	flags6 := byte(0)
@@ -233,6 +277,20 @@ func (r *Rom) Save(writer io.Writer) error {
 	return nil
 }
 
+/** Function (r *Rom) SaveFile(dir string) error
+  * Receiver:
+  *   *Rom r
+  * Parameters:
+  *   string dir
+  * Return values:
+  *   error
+  *
+  *   OR
+  *
+  *   nil
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (r *Rom) SaveFile(dir string) error {
 	fd, err := os.Create(path.Join(dir, r.Filename))
 	if err != nil {
