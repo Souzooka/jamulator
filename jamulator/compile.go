@@ -1,9 +1,11 @@
 package jamulator
 
+// TODO: Split this stuff up into a compile/ folder
 // generates a module compatible with runtime/rom.h
 
 import (
 	"fmt"
+  // TODO: Is it safe having external imports?
 	"llvm.org/svn/llvm-project/llvm/branches/release_36/bindings/go/llvm.svn"
 	"os"
 )
@@ -117,6 +119,16 @@ const (
 	cfExpectInstr
 )
 
+/** Function (c *Compilation) visitForControlFlow()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) visitForControlFlow() {
 	// detect whether labels are data or instructions
 	currentLabel := ""
@@ -150,6 +162,16 @@ func (c *Compilation) visitForControlFlow() {
 	}
 }
 
+/** Function (c *Compilation) visitForBasicBlocks()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) visitForBasicBlocks() {
 	c.builder.SetInsertPointAtEnd(c.mainFn.EntryBasicBlock())
 	for e := c.program.List.Front(); e != nil; e = e.Next() {
@@ -160,6 +182,16 @@ func (c *Compilation) visitForBasicBlocks() {
 	}
 }
 
+/** Function (c *Compilation) visitForCompile()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) visitForCompile() {
 	c.currentBlock = nil
 	for e := c.program.List.Front(); e != nil; e = e.Next() {
@@ -182,6 +214,16 @@ func (c *Compilation) visitForCompile() {
 	}
 }
 
+/** Function (c *Compilation) testAndSetZero(v int)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   int v
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) testAndSetZero(v int) {
 	if v == 0 {
 		c.setZero()
@@ -190,42 +232,142 @@ func (c *Compilation) testAndSetZero(v int) {
 	c.clearZero()
 }
 
+/** Function (c *Compilation) setZero()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) setZero() {
 	c.builder.CreateStore(llvm.ConstInt(llvm.Int1Type(), 1, false), c.rSZero)
 }
 
+/** Function (c *Compilation) clearZero()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) clearZero() {
 	c.builder.CreateStore(llvm.ConstInt(llvm.Int1Type(), 0, false), c.rSZero)
 }
 
+/** Function (c *Compilation) setDec()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) setDec() {
 	c.builder.CreateStore(llvm.ConstInt(llvm.Int1Type(), 1, false), c.rSDec)
 }
 
+/** Function (c *Compilation) clearDec()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) clearDec() {
 	c.builder.CreateStore(llvm.ConstInt(llvm.Int1Type(), 0, false), c.rSDec)
 }
 
+/** Function (c *Compilation) setInt()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) setInt() {
 	c.builder.CreateStore(llvm.ConstInt(llvm.Int1Type(), 1, false), c.rSInt)
 }
 
+/** Function (c *Compilation) clearInt()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) clearInt() {
 	c.builder.CreateStore(llvm.ConstInt(llvm.Int1Type(), 0, false), c.rSInt)
 }
 
+/** Function (c *Compilation) setCarry()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) setCarry() {
 	c.builder.CreateStore(llvm.ConstInt(llvm.Int1Type(), 1, false), c.rSCarry)
 }
 
+/** Function (c *Compilation) clearCarry()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) clearCarry() {
 	c.builder.CreateStore(llvm.ConstInt(llvm.Int1Type(), 0, false), c.rSCarry)
 }
 
+/** Function (c *Compilation) clearOverflow()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) clearOverflow() {
 	c.builder.CreateStore(llvm.ConstInt(llvm.Int1Type(), 0, false), c.rSOver)
 }
 
+/** Function (c *Compilation) testAndSetNeg(v int)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   int v
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) testAndSetNeg(v int) {
 	if v&0x80 == 0x80 {
 		c.setNeg()
@@ -234,14 +376,44 @@ func (c *Compilation) testAndSetNeg(v int) {
 	c.clearNeg()
 }
 
+/** Function (c *Compilation) setNeg()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) setNeg() {
 	c.builder.CreateStore(llvm.ConstInt(llvm.Int1Type(), 1, false), c.rSNeg)
 }
 
+/** Function (c *Compilation) clearNeg()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) clearNeg() {
 	c.builder.CreateStore(llvm.ConstInt(llvm.Int1Type(), 0, false), c.rSNeg)
 }
 
+/** Function (c *Compilation) dynTestAndSetNeg(v llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) dynTestAndSetNeg(v llvm.Value) {
 	x80 := llvm.ConstInt(llvm.Int8Type(), 0x80, false)
 	masked := c.builder.CreateAnd(v, x80, "")
@@ -249,12 +421,32 @@ func (c *Compilation) dynTestAndSetNeg(v llvm.Value) {
 	c.builder.CreateStore(isNeg, c.rSNeg)
 }
 
+/** Function (c *Compilation) dynTestAndSetZero(v llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value v
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) dynTestAndSetZero(v llvm.Value) {
 	zeroConst := llvm.ConstInt(llvm.Int8Type(), 0, false)
 	isZero := c.builder.CreateICmp(llvm.IntEQ, v, zeroConst, "")
 	c.builder.CreateStore(isZero, c.rSZero)
 }
 
+/** Function (c *Compilation) dynTestAndSetCarryLShr(val llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llmv.Value val
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) dynTestAndSetCarryLShr(val llvm.Value) {
 	masked := c.builder.CreateAnd(val, llvm.ConstInt(llvm.Int8Type(), 0x1, false), "")
 	c0 := llvm.ConstInt(llvm.Int8Type(), 0, false)
@@ -262,6 +454,16 @@ func (c *Compilation) dynTestAndSetCarryLShr(val llvm.Value) {
 	c.builder.CreateStore(isCarry, c.rSCarry)
 }
 
+/** Function (c *Compilation) dynTestAndSetCarryShl(val llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value val
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) dynTestAndSetCarryShl(val llvm.Value) {
 	c0 := llvm.ConstInt(llvm.Int8Type(), 0, false)
 	x80 := llvm.ConstInt(llvm.Int8Type(), 0x80, false)
@@ -270,12 +472,32 @@ func (c *Compilation) dynTestAndSetCarryShl(val llvm.Value) {
 	c.builder.CreateStore(isCarry, c.rSCarry)
 }
 
+/** Function (c *Compilation) dynTestAndSetCarrySubtraction(left llvm.Value, right llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value left, llvm.Value right
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) dynTestAndSetCarrySubtraction(left llvm.Value, right llvm.Value) {
 	// set the carry bit if result is positive or zero
 	isCarry := c.builder.CreateICmp(llvm.IntUGE, left, right, "")
 	c.builder.CreateStore(isCarry, c.rSCarry)
 }
 
+/** Function (c *Compilation) dynTestAndSetCarrySubtraction3(a llvm.Value, v llvm.Value, carry llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value a, llvm.Value v, llvm.Value carry
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) dynTestAndSetCarrySubtraction3(a llvm.Value, v llvm.Value, carry llvm.Value) {
 	// set the carry bit if result is positive or zero
 	a32 := c.builder.CreateZExt(a, llvm.Int32Type(), "")
@@ -293,12 +515,32 @@ func (c *Compilation) dynTestAndSetCarrySubtraction3(a llvm.Value, v llvm.Value,
 	c.builder.CreateStore(isCarry, c.rSCarry)
 }
 
+/** Function (c *Compilation) performLdy(v llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value v
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) performLdy(v llvm.Value) {
 	c.builder.CreateStore(v, c.rY)
 	c.dynTestAndSetZero(v)
 	c.dynTestAndSetNeg(v)
 }
 
+/** Function (c *Compilation) performLsr(v llvm.Value) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value v
+  * Return values:
+  *   llvm.Value newValue
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) performLsr(v llvm.Value) llvm.Value {
 	c1 := llvm.ConstInt(llvm.Int8Type(), 1, false)
 	newValue := c.builder.CreateLShr(v, c1, "")
@@ -308,6 +550,16 @@ func (c *Compilation) performLsr(v llvm.Value) llvm.Value {
 	return newValue
 }
 
+/** Function (c *Compilation) performOra(v llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value v
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) performOra(v llvm.Value) {
 	a := c.builder.CreateLoad(c.rA, "")
 	newA := c.builder.CreateOr(a, v, "")
@@ -316,18 +568,48 @@ func (c *Compilation) performOra(v llvm.Value) {
 	c.dynTestAndSetNeg(newA)
 }
 
+/** Function (c *Compilation) performLda(v llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value v
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) performLda(v llvm.Value) {
 	c.builder.CreateStore(v, c.rA)
 	c.dynTestAndSetZero(v)
 	c.dynTestAndSetNeg(v)
 }
 
+/** Function (c *Compilation) performLdx(v llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value v
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) performLdx(v llvm.Value) {
 	c.builder.CreateStore(v, c.rX)
 	c.dynTestAndSetZero(v)
 	c.dynTestAndSetNeg(v)
 }
 
+/** Function (c *Compilation) performCmp(lval llvm.Value, rval llvm.Value) {
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value lval, llvm.Value rval
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) performCmp(lval llvm.Value, rval llvm.Value) {
 	diff := c.builder.CreateSub(lval, rval, "")
 	c.dynTestAndSetZero(diff)
@@ -335,6 +617,16 @@ func (c *Compilation) performCmp(lval llvm.Value, rval llvm.Value) {
 	c.dynTestAndSetCarrySubtraction(lval, rval)
 }
 
+/** Function (c *Compilation) performRor(val llvm.Value) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value val
+  * Return values:
+  *   llvm.Value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) performRor(val llvm.Value) llvm.Value {
 	c1 := llvm.ConstInt(llvm.Int8Type(), 1, false)
 	c7 := llvm.ConstInt(llvm.Int8Type(), 7, false)
@@ -349,6 +641,16 @@ func (c *Compilation) performRor(val llvm.Value) llvm.Value {
 	return newValue
 }
 
+/** Function (c *Compilation) performRol(val llvm.Value) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value val
+  * Return values:
+  *   llvm.Value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) performRol(val llvm.Value) llvm.Value {
 	c1 := llvm.ConstInt(val.Type(), 1, false)
 	shifted := c.builder.CreateShl(val, c1, "")
@@ -362,6 +664,16 @@ func (c *Compilation) performRol(val llvm.Value) llvm.Value {
 	return newValue
 }
 
+/** Function (c *Compilation) performAsl(val llvm.Value) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value val
+  * Return values:
+  *   llvm.Value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) performAsl(val llvm.Value) llvm.Value {
 	c1 := llvm.ConstInt(llvm.Int8Type(), 1, false)
 	newValue := c.builder.CreateShl(val, c1, "")
@@ -371,6 +683,16 @@ func (c *Compilation) performAsl(val llvm.Value) llvm.Value {
 	return newValue
 }
 
+/** Function (c *Compilation) performAdc(val llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value val
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) performAdc(val llvm.Value) {
 	a := c.builder.CreateLoad(c.rA, "")
 	aPlusV := c.builder.CreateAdd(a, val, "")
@@ -384,6 +706,16 @@ func (c *Compilation) performAdc(val llvm.Value) {
 	c.dynTestAndSetCarryAddition(a, val, carry)
 }
 
+/** Function (c *Compilation) performSbc(val llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value val
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) performSbc(val llvm.Value) {
 	a := c.builder.CreateLoad(c.rA, "")
 	// subtract val
@@ -407,6 +739,16 @@ func (c *Compilation) performSbc(val llvm.Value) {
 	c.dynTestAndSetCarrySubtraction3(a, val, carry)
 }
 
+/** Function (c *Compilation) performBit(val llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value val
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) performBit(val llvm.Value) {
 	a := c.builder.CreateLoad(c.rA, "")
 	c0 := llvm.ConstInt(llvm.Int8Type(), 0, false)
@@ -426,6 +768,16 @@ func (c *Compilation) performBit(val llvm.Value) {
 	c.builder.CreateStore(isOver, c.rSOver)
 }
 
+/** Function (c *Compilation) performAnd(v llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value val
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) performAnd(v llvm.Value) {
 	a := c.builder.CreateLoad(c.rA, "")
 	newA := c.builder.CreateAnd(a, v, "")
@@ -434,6 +786,16 @@ func (c *Compilation) performAnd(v llvm.Value) {
 	c.dynTestAndSetNeg(newA)
 }
 
+/** Function (c *Compilation) performEor(v llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value val
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) performEor(v llvm.Value) {
 	a := c.builder.CreateLoad(c.rA, "")
 	newA := c.builder.CreateXor(a, v, "")
@@ -442,6 +804,17 @@ func (c *Compilation) performEor(v llvm.Value) {
 	c.dynTestAndSetNeg(newA)
 }
 
+/** Function (c *Compilation) dynStore(addr llvm.Value, minAddr int, maxAddr int, val llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value arr, int minAddr, int maxAddr, llvm.Value val
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
+// TODO: Split this into small functions/into another file?
 func (c *Compilation) dynStore(addr llvm.Value, minAddr int, maxAddr int, val llvm.Value) {
 	c.debugPrintf("store $%02x in $%04x\n", []llvm.Value{val, addr})
 	if maxAddr < 0x800 {
@@ -711,6 +1084,16 @@ func (c *Compilation) dynStore(addr llvm.Value, minAddr int, maxAddr int, val ll
 	c.selectBlock(storeDoneBlock)
 }
 
+/** Function (c *Compilation) store(addr int, i8 llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   int addr, llvm.Value i8
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) store(addr int, i8 llvm.Value) {
 	c.debugPrintf("store $%02x in $%04x\n", []llvm.Value{i8, llvm.ConstInt(llvm.Int16Type(), uint64(addr), false)})
 
@@ -835,6 +1218,16 @@ func (c *Compilation) store(addr int, i8 llvm.Value) {
 
 }
 
+/** Function (c *Compilation) dynLoad(addr llvm.Value, minAddr int, maxAddr int) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value addr, int minAddr, int maxAddr
+  * Return values:
+  *   llvm.Value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) dynLoad(addr llvm.Value, minAddr int, maxAddr int) llvm.Value {
 	// returns the byte at addr, with runtime checks for the range between minAddr and maxAddr
 	// currently only can do WRAM stuff
@@ -977,6 +1370,16 @@ func (c *Compilation) dynLoad(addr llvm.Value, minAddr int, maxAddr int) llvm.Va
 	return c.builder.CreateLoad(result, "")
 }
 
+/** Function (c *Compilation) wramPtr(addr int) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   int addr
+  * Return values:
+  *   llvm.Value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) wramPtr(addr int) llvm.Value {
 	// 2KB working RAM. mask because mirrored
 	if addr < 0 || addr >= 0x2000 {
@@ -990,6 +1393,16 @@ func (c *Compilation) wramPtr(addr int) llvm.Value {
 	return c.builder.CreateGEP(c.wram, indexes, "")
 }
 
+/** Function (c *Compilation) load(addr int) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   int addr
+  * Return values:
+  *   llvm.Value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) load(addr int) llvm.Value {
 	switch {
 	default:
@@ -1039,7 +1452,16 @@ func (c *Compilation) load(addr int) llvm.Value {
 	panic("unreachable")
 }
 
-// loads a little endian word
+/** Function (c *Compilation) wramPtr(addr int) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   int addr
+  * Return values:
+  *   llvm.Value
+  * Behavior:
+  *   loads a little endian word (DOCUMENTATION TODO)
+  */
 func (c *Compilation) loadWord(addr int) llvm.Value {
 	ptrByte1 := c.load(addr)
 	ptrByte2 := c.load(addr + 1)
@@ -1050,6 +1472,16 @@ func (c *Compilation) loadWord(addr int) llvm.Value {
 	return c.builder.CreateOr(word, ptrByte1w, "")
 }
 
+/** Function (c *Compilation) dynLoadWord(addr llvm.Value) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value addr
+  * Return values:
+  *   llvm.Value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) dynLoadWord(addr llvm.Value) llvm.Value {
 	addrPlusOne := c.builder.CreateAdd(addr, llvm.ConstInt(addr.Type(), 1, false), "")
 	ptrByte1 := c.dynLoad(addr, 0, 0xffff)
@@ -1061,6 +1493,16 @@ func (c *Compilation) dynLoadWord(addr llvm.Value) llvm.Value {
 	return c.builder.CreateOr(word, ptrByte1w, "")
 }
 
+/** Function (c *Compilation) incrementVal(v llvm.Value, delta int) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value v, int delta
+  * Return values:
+  *   llvm.Value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) incrementVal(v llvm.Value, delta int) llvm.Value {
 	if delta < 0 {
 		c1 := llvm.ConstInt(llvm.Int8Type(), uint64(-delta), false)
@@ -1070,6 +1512,16 @@ func (c *Compilation) incrementVal(v llvm.Value, delta int) llvm.Value {
 	return c.builder.CreateAdd(v, c1, "")
 }
 
+/** Function (c *Compilation) incrementMem(int addr, delta int)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   int addr, int delta
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) incrementMem(addr int, delta int) {
 	oldValue := c.load(addr)
 	newValue := c.incrementVal(oldValue, delta)
@@ -1078,6 +1530,16 @@ func (c *Compilation) incrementMem(addr int, delta int) {
 	c.dynTestAndSetNeg(newValue)
 }
 
+/** Function (c *Compilation) increment(ptr llvm.Value, delta int)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value ptr, int delta
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) increment(ptr llvm.Value, delta int) {
 	oldValue := c.builder.CreateLoad(ptr, "")
 	newValue := c.incrementVal(oldValue, delta)
@@ -1086,6 +1548,16 @@ func (c *Compilation) increment(ptr llvm.Value, delta int) {
 	c.dynTestAndSetZero(newValue)
 }
 
+/** Function (c *Compilation) transfer(source llvm.Value, dest llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value source, llvm.Value dest
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) transfer(source llvm.Value, dest llvm.Value) {
 	v := c.builder.CreateLoad(source, "")
 	c.builder.CreateStore(v, dest)
@@ -1093,17 +1565,47 @@ func (c *Compilation) transfer(source llvm.Value, dest llvm.Value) {
 	c.dynTestAndSetZero(v)
 }
 
+/** Function (c *Compilation) createBlock(name string) llvm.BasicBlock
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   string name
+  * Return values:
+  *   llvm.BasicBlock
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) createBlock(name string) llvm.BasicBlock {
 	bb := llvm.InsertBasicBlock(*c.currentBlock, name)
 	bb.MoveAfter(*c.currentBlock)
 	return bb
 }
 
+/** Function (c *Compilation) selectBlock(bb llvm.BasicBlock)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.BasicBlock bb
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) selectBlock(bb llvm.BasicBlock) {
 	c.builder.SetInsertPointAtEnd(bb)
 	c.currentBlock = &bb
 }
 
+/** Function (c *Compilation) createPanic(msg string, args []llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   string msg, llvm.Value array args
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) createPanic(msg string, args []llvm.Value) {
 	c.printf(msg, args)
 	if c.currentInstr != nil {
@@ -1130,7 +1632,16 @@ func (c *Compilation) createPanic(msg string, args []llvm.Value) {
 	c.builder.CreateUnreachable()
 }
 
-// returns the else block, sets the current block to the if block
+/** Function (c *Compilation) createIf(cond llvm.Value) llvm.BasicBlock
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value cond
+  * Return values:
+  *   llvm.BasicBlock elseBlock
+  * Behavior:
+  *   returns the else block, sets the current block to the if block (DOCUMENTATION TODO)
+  */
 func (c *Compilation) createIf(cond llvm.Value) llvm.BasicBlock {
 	elseBlock := c.createBlock("else")
 	thenBlock := c.createBlock("then")
@@ -1139,6 +1650,16 @@ func (c *Compilation) createIf(cond llvm.Value) llvm.BasicBlock {
 	return elseBlock
 }
 
+/** Function (c *Compilation) pullFromStack() llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   llvm.value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) pullFromStack() llvm.Value {
 	// increment stack pointer
 	sp := c.builder.CreateLoad(c.rSP, "")
@@ -1150,6 +1671,16 @@ func (c *Compilation) pullFromStack() llvm.Value {
 	return c.dynLoad(addr, 0x100, 0x1ff)
 }
 
+/** Function (c *Compilation) pullWordFromStack() llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   llvm.value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) pullWordFromStack() llvm.Value {
 	low := c.pullFromStack()
 	high := c.pullFromStack()
@@ -1159,6 +1690,16 @@ func (c *Compilation) pullWordFromStack() llvm.Value {
 	return c.builder.CreateOr(word, low16, "")
 }
 
+/** Function (c *Compilation) pushToStack(v llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value v
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) pushToStack(v llvm.Value) {
 	// write the value to the address at current stack pointer
 	sp := c.builder.CreateLoad(c.rSP, "")
@@ -1170,6 +1711,16 @@ func (c *Compilation) pushToStack(v llvm.Value) {
 	c.builder.CreateStore(spMinusOne, c.rSP)
 }
 
+/** Function (c *Compilation) pushWordToStack(word llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value word
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) pushWordToStack(word llvm.Value) {
 	high16 := c.builder.CreateLShr(word, llvm.ConstInt(llvm.Int16Type(), 8, false), "")
 	high := c.builder.CreateTrunc(high16, llvm.Int8Type(), "")
@@ -1179,6 +1730,16 @@ func (c *Compilation) pushWordToStack(word llvm.Value) {
 	c.pushToStack(low)
 }
 
+/** Function (c *Compilation) pullStatusReg()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) pullStatusReg() {
 	status := c.pullFromStack()
 	// and
@@ -1208,6 +1769,16 @@ func (c *Compilation) pullStatusReg() {
 	c.builder.CreateStore(s0, c.rSCarry)
 }
 
+/** Function (c *Compilation) getStatusByte()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   llvm.Value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) getStatusByte() llvm.Value {
 	// zextend
 	s7z := c.builder.CreateZExt(c.builder.CreateLoad(c.rSNeg, ""), llvm.Int8Type(), "")
@@ -1234,6 +1805,16 @@ func (c *Compilation) getStatusByte() llvm.Value {
 	return s0z
 }
 
+/** Function (c *Compilation) cycle(count int, pc int)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   int count, int pc
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) cycle(count int, pc int) {
 	// pc -1 means don't mess with the pc
 	if pc >= 0 {
@@ -1246,10 +1827,30 @@ func (c *Compilation) cycle(count int, pc int) {
 	c.builder.CreateCall(c.cycleFn, []llvm.Value{v}, "")
 }
 
+/** Function (c *Compilation) debugPrint(str string)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   string str
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) debugPrint(str string) {
 	c.debugPrintf(str, []llvm.Value{})
 }
 
+/** Function (c *Compilation) getMemoizedStrGlob(str string) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   string str
+  * Return values:
+  *   llvm.Value glob
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) getMemoizedStrGlob(str string) llvm.Value {
 	glob, ok := c.stringTable[str]
 	if !ok {
@@ -1263,6 +1864,16 @@ func (c *Compilation) getMemoizedStrGlob(str string) llvm.Value {
 	return glob
 }
 
+/** Function (c *Compilation) printf(str string, values []llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   string str, llvm.Value array values
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) printf(str string, values []llvm.Value) {
 	glob := c.getMemoizedStrGlob(str)
 	bytePointerType := llvm.PointerType(llvm.Int8Type(), 0)
@@ -1274,6 +1885,16 @@ func (c *Compilation) printf(str string, values []llvm.Value) {
 	c.builder.CreateCall(c.printfFn, args, "")
 }
 
+/** Function (c *Compilation) debugPrintf(str string, values []llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   string str, llvm.Value array values
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) debugPrintf(str string, values []llvm.Value) {
 	if c.Flags&IncludeDebugFlag == 0 {
 		return
@@ -1281,6 +1902,16 @@ func (c *Compilation) debugPrintf(str string, values []llvm.Value) {
 	c.printf(str, values)
 }
 
+/** Function (c *Compilation) debugPrintStatus()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) debugPrintStatus() {
 	if c.Flags&IncludeDebugFlag != 0 {
 		c.printf("A $%02x  X $%02x  Y $%02x  P $%02x  PC $%04x  SP $%02x\n", []llvm.Value{
@@ -1292,8 +1923,18 @@ func (c *Compilation) debugPrintStatus() {
 			c.builder.CreateLoad(c.rSP, ""),
 		})
 	}
-
 }
+
+/** Function (c *Compilation) createBranch(cond llvm.Value, labelName string, instrAddr int)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value cond, string labelName, int instrAddr
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) createBranch(cond llvm.Value, labelName string, instrAddr int) {
 	branchBlock := c.labeledBlocks[labelName]
 	thenBlock := c.createBlock("then")
@@ -1318,6 +1959,16 @@ func (c *Compilation) createBranch(cond llvm.Value, labelName string, instrAddr 
 	c.cycle(2, instrAddr+2) // branch instructions are 2 bytes
 }
 
+/** Function (c *Compilation) absoluteIndexedStore(valPtr llvm.Value, baseAddr int, indexPtr llvm.Value, pc int)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value, int baseAddr, llvm.Value indexPtr, int pc
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) absoluteIndexedStore(valPtr llvm.Value, baseAddr int, indexPtr llvm.Value, pc int) {
 	index := c.builder.CreateLoad(indexPtr, "")
 	index16 := c.builder.CreateZExt(index, llvm.Int16Type(), "")
@@ -1328,6 +1979,16 @@ func (c *Compilation) absoluteIndexedStore(valPtr llvm.Value, baseAddr int, inde
 	c.cycle(5, pc)
 }
 
+/** Function (c *Compilation) dynLoadZpgIndexed(baseAddr int, indexPtr llvm.Value) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   int baseAddr, llvm.Value indexPtr
+  * Return values:
+  *   llvm.Value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) dynLoadZpgIndexed(baseAddr int, indexPtr llvm.Value) llvm.Value {
 	index := c.builder.CreateLoad(indexPtr, "")
 	base := llvm.ConstInt(llvm.Int8Type(), uint64(baseAddr), false)
@@ -1336,6 +1997,16 @@ func (c *Compilation) dynLoadZpgIndexed(baseAddr int, indexPtr llvm.Value) llvm.
 	return c.dynLoad(addr16, 0, 0xff)
 }
 
+/** Function (c *Compilation) dynLoadIndexed(baseAddr int, indexPtr llvm.Value) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   int baseAddr, llvm.Value indexPtr
+  * Return values:
+  *   llvm.Value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) dynLoadIndexed(baseAddr int, indexPtr llvm.Value) llvm.Value {
 	index := c.builder.CreateLoad(indexPtr, "")
 	index16 := c.builder.CreateZExt(index, llvm.Int16Type(), "")
@@ -1344,6 +2015,16 @@ func (c *Compilation) dynLoadIndexed(baseAddr int, indexPtr llvm.Value) llvm.Val
 	return c.dynLoad(addr, baseAddr, baseAddr+0xff)
 }
 
+/** Function (c *Compilation) dynStoreZpgIndexed(baseAddr int, indexPtr llvm.Value, val llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   int baseAddr, llvm.Value indexPtr, llvm.Value val
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) dynStoreZpgIndexed(baseAddr int, indexPtr llvm.Value, val llvm.Value) {
 	index := c.builder.CreateLoad(indexPtr, "")
 	base := llvm.ConstInt(llvm.Int8Type(), uint64(baseAddr), false)
@@ -1352,6 +2033,16 @@ func (c *Compilation) dynStoreZpgIndexed(baseAddr int, indexPtr llvm.Value, val 
 	c.dynStore(addr16, 0, 0xff, val)
 }
 
+/** Function (c *Compilation) dynStoreIndexed(baseAddr int, indexPtr llvm.Value, val llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   int baseAddr, llvm.Value indexPtr, llvm.Value val
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) dynStoreIndexed(baseAddr int, indexPtr llvm.Value, val llvm.Value) {
 	index := c.builder.CreateLoad(indexPtr, "")
 	index16 := c.builder.CreateZExt(index, llvm.Int16Type(), "")
@@ -1360,6 +2051,16 @@ func (c *Compilation) dynStoreIndexed(baseAddr int, indexPtr llvm.Value, val llv
 	c.dynStore(addr, baseAddr, baseAddr+0xff, val)
 }
 
+/** Function (c *Compilation) absoluteIndexedLoad(destPtr llvm.Value, indexPtr llvm.Value, val llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value destPtr, int baseAddr, llvm.Value indexPtr, llvm.Value val
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) absoluteIndexedLoad(destPtr llvm.Value, baseAddr int, indexPtr llvm.Value, pc int) {
 	index := c.builder.CreateLoad(indexPtr, "")
 	index16 := c.builder.CreateZExt(index, llvm.Int16Type(), "")
@@ -1372,6 +2073,16 @@ func (c *Compilation) absoluteIndexedLoad(destPtr llvm.Value, baseAddr int, inde
 	c.cyclesForAbsoluteIndexed(baseAddr, index16, pc)
 }
 
+/** Function (c *Compilation) cyclesForIndirectY(baseAddr, addr llvm.Value, pc int)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   baseAddr, llvm.Value addr, int pc
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) cyclesForIndirectY(baseAddr, addr llvm.Value, pc int) {
 	// if address & 0xff00 != (address + y) & 0xff00
 	xff00 := llvm.ConstInt(llvm.Int16Type(), uint64(0xff00), false)
@@ -1391,12 +2102,32 @@ func (c *Compilation) cyclesForIndirectY(baseAddr, addr llvm.Value, pc int) {
 	c.selectBlock(loadDoneBlock)
 }
 
+/** Function (c *Compilation) cyclesForAbsoluteIndexedPtr(baseAddr, addr llvm.Value, pc int)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   baseAddr, llvm.Value addr, int pc
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) cyclesForAbsoluteIndexedPtr(baseAddr int, indexPtr llvm.Value, pc int) {
 	index := c.builder.CreateLoad(indexPtr, "")
 	index16 := c.builder.CreateZExt(index, llvm.Int16Type(), "")
 	c.cyclesForAbsoluteIndexed(baseAddr, index16, pc)
 }
 
+/** Function (c *Compilation) cyclesForAbsoluteIndexed(baseAddr, addr llvm.Value, pc int)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   baseAddr, llvm.Value addr, int pc
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) cyclesForAbsoluteIndexed(baseAddr int, index16 llvm.Value, pc int) {
 	// if address & 0xff00 != (address + x) & 0xff00
 	baseAddrMasked := baseAddr & 0xff00
@@ -1421,6 +2152,16 @@ func (c *Compilation) cyclesForAbsoluteIndexed(baseAddr int, index16 llvm.Value,
 	c.selectBlock(loadDoneBlock)
 }
 
+/** Function (c *Compilation) dynTestAndSetCarryAddition(a llvm.Value, v llvm.Value, carry llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value a, llvm.Value v, llvm.Value carry
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) dynTestAndSetCarryAddition(a llvm.Value, v llvm.Value, carry llvm.Value) {
 	a32 := c.builder.CreateZExt(a, llvm.Int32Type(), "")
 	carry32 := c.builder.CreateZExt(carry, llvm.Int32Type(), "")
@@ -1431,6 +2172,16 @@ func (c *Compilation) dynTestAndSetCarryAddition(a llvm.Value, v llvm.Value, car
 	c.builder.CreateStore(isCarry, c.rSCarry)
 }
 
+/** Function (c *Compilation) dynTestAndSetOverflowAddition(a llvm.Value, b llvm.Value, r llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value a, llvm.Value b, llvm.Value r
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) dynTestAndSetOverflowAddition(a llvm.Value, b llvm.Value, r llvm.Value) {
 	x80 := llvm.ConstInt(llvm.Int8Type(), 0x80, false)
 	x0 := llvm.ConstInt(llvm.Int8Type(), 0x0, false)
@@ -1444,6 +2195,16 @@ func (c *Compilation) dynTestAndSetOverflowAddition(a llvm.Value, b llvm.Value, 
 	c.builder.CreateStore(isOver, c.rSOver)
 }
 
+/** Function (c *Compilation) dynTestAndSetOverflowSubtraction(a llvm.Value, b llvm.Value, r llvm.Value)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Value a, llvm.Value b, llvm.Value r
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) dynTestAndSetOverflowSubtraction(a llvm.Value, b llvm.Value, carry llvm.Value) {
 	c0 := llvm.ConstInt(llvm.Int8Type(), 0, false)
 	c1 := llvm.ConstInt(llvm.Int8Type(), 1, false)
@@ -1464,7 +2225,16 @@ func (c *Compilation) dynTestAndSetOverflowSubtraction(a llvm.Value, b llvm.Valu
 	c.builder.CreateStore(isOver, c.rSOver)
 }
 
-
+/** Function (s *LabelStatement) Compile(c *Compilation)
+  * Receiver:
+  *   s *LabelStatement (./assembly6502.y)
+  * Parameters:
+  *   c *Compilation
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (s *LabelStatement) Compile(c *Compilation) {
 	bb, ok := c.labeledBlocks[s.LabelName]
 	if !ok {
@@ -1478,6 +2248,16 @@ func (s *LabelStatement) Compile(c *Compilation) {
 	c.builder.SetInsertPointAtEnd(bb)
 }
 
+/** Function (c *Compilation) compileLabels(s *LabelStatement)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   s *LabelStatement (./asm6502.y)
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) compileLabels(s *LabelStatement) {
 	// if it's a "data block" ignore it
 	_, ok := c.labeledData[s.LabelName]
@@ -1499,6 +2279,16 @@ func (c *Compilation) compileLabels(s *LabelStatement) {
 	}
 }
 
+/** Function (c *Compilation) setUpEntryPoint(p *Program, addr int, s *string)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   p *Program (./assembly.go), int addr, string ptr s
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) setUpEntryPoint(p *Program, addr int, s *string) {
 	e, ok := p.Offsets[addr]
 	if !ok {
@@ -1522,6 +2312,16 @@ func (c *Compilation) setUpEntryPoint(p *Program, addr int, s *string) {
 	*s = call.LabelName
 }
 
+/** Function (c *Compilation) createPrgRomGlobal(prgRom [][]byte)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   byte array prgRom
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) createPrgRomGlobal(prgRom [][]byte) {
 	if len(prgRom) > 2 {
 		panic("only 1-2 prg rom banks are supported")
@@ -1544,6 +2344,16 @@ func (c *Compilation) createPrgRomGlobal(prgRom [][]byte) {
 	c.prgRom.SetGlobalConstant(true)
 }
 
+/** Function (c *Compilation) createReadChrFn(chrRom [][]byte)
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   byte array chrRom
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) createReadChrFn(chrRom [][]byte) {
 	//uint8_t rom_chr_bank_count;
 	bankCountConst := llvm.ConstInt(llvm.Int8Type(), uint64(len(chrRom)), false)
@@ -1581,6 +2391,16 @@ func (c *Compilation) createReadChrFn(chrRom [][]byte) {
 	c.builder.CreateRetVoid()
 }
 
+/** Function (c *Compilation) createNamedGlobal(intType llvm.Type, name string) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   llvm.Type intType, string name
+  * Return values:
+  *   llvm.Value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) createNamedGlobal(intType llvm.Type, name string) llvm.Value {
 	val := llvm.ConstInt(intType, 0, false)
 	glob := llvm.AddGlobal(c.mod, val.Type(), name)
@@ -1589,18 +2409,58 @@ func (c *Compilation) createNamedGlobal(intType llvm.Type, name string) llvm.Val
 	return glob
 }
 
+/** Function (c *Compilation) createByteRegister(name string) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   string name
+  * Return values:
+  *   llvm.Value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) createByteRegister(name string) llvm.Value {
 	return c.createNamedGlobal(llvm.Int8Type(), name)
 }
 
+/** Function (c *Compilation) createWordRegister(name string) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   string name
+  * Return values:
+  *   llvm.Value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) createWordRegister(name string) llvm.Value {
 	return c.createNamedGlobal(llvm.Int16Type(), name)
 }
 
+/** Function (c *Compilation) createBitRegister(name string) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   string name
+  * Return values:
+  *   llvm.Value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) createBitRegister(name string) llvm.Value {
 	return c.createNamedGlobal(llvm.Int1Type(), name)
 }
 
+/** Function (c *Compilation) declareReadFn(name string) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   string name
+  * Return values:
+  *   llvm.Value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) declareReadFn(name string) llvm.Value {
 	readByteType := llvm.FunctionType(llvm.Int8Type(), []llvm.Type{}, false)
 	fn := llvm.AddFunction(c.mod, name, readByteType)
@@ -1608,6 +2468,16 @@ func (c *Compilation) declareReadFn(name string) llvm.Value {
 	return fn
 }
 
+/** Function (c *Compilation) declareWriteFn(name string) llvm.Value
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   string name
+  * Return values:
+  *   llvm.Value
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) declareWriteFn(name string) llvm.Value {
 	writeByteType := llvm.FunctionType(llvm.VoidType(), []llvm.Type{llvm.Int8Type()}, false)
 	fn := llvm.AddFunction(c.mod, name, writeByteType)
@@ -1615,6 +2485,16 @@ func (c *Compilation) declareWriteFn(name string) llvm.Value {
 	return fn
 }
 
+/** Function (c *Compilation) createFunctionDeclares()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) createFunctionDeclares() {
 	// declare void @memcpy(void* dest, void* source, i32 size)
 	bytePointerType := llvm.PointerType(llvm.Int8Type(), 0)
@@ -1680,6 +2560,16 @@ func (c *Compilation) createFunctionDeclares() {
 	c.apuWriteCtrlFlags2Fn = c.declareWriteFn("rom_apu_write_controlflags2")
 }
 
+/** Function (c *Compilation) createRegister()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) createRegisters() {
 	c.rX = c.createByteRegister("X")
 	c.rY = c.createByteRegister("Y")
@@ -1695,6 +2585,16 @@ func (c *Compilation) createRegisters() {
 	c.rSCarry = c.createBitRegister("S_carry")
 }
 
+/** Function (c *Compilation) addNmiInterruptCode()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) addNmiInterruptCode() {
 	c.builder.SetInsertPointBefore(c.nmiBlock.FirstInstruction())
 	// * push PC high onto stack
@@ -1704,6 +2604,16 @@ func (c *Compilation) addNmiInterruptCode() {
 	c.pushToStack(c.getStatusByte())
 }
 
+/** Function (c *Compilation) addResetInterruptCode()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) addResetInterruptCode() {
 	// TODO: move this reset initialization to a separate block
 	c.builder.SetInsertPointBefore(c.resetBlock.FirstInstruction())
@@ -1726,6 +2636,16 @@ func (c *Compilation) addResetInterruptCode() {
 	c.builder.CreateStore(bit0, c.rSCarry)
 }
 
+/** Function (c *Compilation) addDynJumpTable()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) addDynJumpTable() {
 	// here we create a basic block that we jump to for instructions such as
 	// BRK, RTS, and RTI.
@@ -1738,6 +2658,16 @@ func (c *Compilation) addDynJumpTable() {
 	}
 }
 
+/** Function (c *Compilation) setupControllerFramework()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) setupControllerFramework() {
 	// ROM_PAD_STATE_OFF = 0x40,
 	x40 := llvm.ConstInt(llvm.Int8Type(), 0x40, false)
@@ -1796,6 +2726,16 @@ func (c *Compilation) setupControllerFramework() {
 
 }
 
+/** Function (c *Compilation) createPadWriteFn()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) createPadWriteFn() {
 	i8Type := llvm.Int8Type()
 	// void padWrite(uint8_t value)
@@ -1838,6 +2778,16 @@ func (c *Compilation) createPadWriteFn() {
 	c.builder.CreateRetVoid()
 }
 
+/** Function (c *Compilation) createPadReadFn()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) createPadReadFn() {
 	i8Type := llvm.Int8Type()
 	c0 := llvm.ConstInt(i8Type, 0, false)
@@ -1887,6 +2837,16 @@ func (c *Compilation) createPadReadFn() {
 	// }
 }
 
+/** Function (c *Compilation) createReadMemFn()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) createReadMemFn() {
 	// uint8_t rom_ram_read(uint16_t addr)
 	readMemType := llvm.FunctionType(llvm.Int8Type(), []llvm.Type{llvm.Int16Type()}, false)
@@ -1897,6 +2857,16 @@ func (c *Compilation) createReadMemFn() {
 	c.builder.CreateRet(v)
 }
 
+/** Function (c *Compilation) addLabelsAfterJsrs()
+  * Receiver:
+  *   c *Compilation (./compile.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (c *Compilation) addLabelsAfterJsrs() {
 	for e := c.program.List.Front(); e != nil; e = e.Next() {
 		i, ok := e.Value.(*Instruction)
@@ -1906,6 +2876,16 @@ func (c *Compilation) addLabelsAfterJsrs() {
 	}
 }
 
+/** Function (p *Program) CompileToFile(file *os.File, flags CompileFlags) (*Compilation, error)
+  * Receiver:
+  *   p *Program (./assembly.go)
+  * Parameters:
+  *   *os.file file, CompileFlags flags
+  * Return values:
+  *   (*Compilation (./compile.go), error)
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (p *Program) CompileToFile(file *os.File, flags CompileFlags) (*Compilation, error) {
 	llvm.InitializeNativeTarget()
 
@@ -2048,6 +3028,16 @@ func (p *Program) CompileToFile(file *os.File, flags CompileFlags) (*Compilation
 	return c, nil
 }
 
+/** Function (p *Program) CompileToFile(string filename, flags CompileFlags) (*Compilation, error)
+  * Receiver:
+  *   p *Program (./assembly.go)
+  * Parameters:
+  *   string filename, CompileFlags flags
+  * Return values:
+  *   (*Compilation (./compile.go), error)
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (p *Program) CompileToFilename(filename string, flags CompileFlags) (*Compilation, error) {
 	fd, err := os.Create(filename)
 	if err != nil {

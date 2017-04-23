@@ -1,10 +1,7 @@
 # jamulator
 
-See the writeup for this project:
+See the Andrew Kelley's writeup for this project:
 [Statically Recompiling NES Games into Native Executables with LLVM and Go](http://andrewkelley.me/post/jamulator.html)
-
-Note: This project is discontinued. See the above article for
-the explanation.
 
 ## Features
 
@@ -16,6 +13,8 @@ the explanation.
    for making test roms.
 
 ## Getting Started Developing
+
+TODO: Is this stuff up-to-date?
 
 1. Set up your `$GOPATH`. Make sure the `bin` folder from your go path
    is in `$PATH`.

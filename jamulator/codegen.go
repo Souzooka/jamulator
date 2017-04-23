@@ -2,9 +2,20 @@ package jamulator
 
 import (
 	"fmt"
+  // TODO: Is it safe having external imports?
 	"llvm.org/svn/llvm-project/llvm/branches/release_36/bindings/go/llvm.svn"
 )
 
+/** Function (i *Instruction) ResolveRender() string
+  * Receiver:
+  *   i *Instruction (./asm6502.y)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   string (DOCUMENTATION TODO)
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (i *Instruction) ResolveRender() string {
 	switch i.Type {
 	case DirectWithLabelInstruction:
@@ -21,6 +32,18 @@ func (i *Instruction) ResolveRender() string {
 	return i.Render()
 }
 
+/** Function (i *Instruction) Compile(c *Compilation)
+  * Receiver:
+  *   i *Instruction (./asm6502.y)
+  * Parameters:
+  *   c (type ptr) *Compilation
+  * Return values:
+  *   void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
+/* TODO: Can we split up switch statement into multiple functions?
+   e.g. group up loading into register ops, jump ops, conditional ops, etc... */
 func (i *Instruction) Compile(c *Compilation) {
 	c.debugPrint(fmt.Sprintf("%s\n", i.ResolveRender()))
 

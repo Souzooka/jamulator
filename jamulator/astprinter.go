@@ -4,6 +4,15 @@ import (
 	"fmt"
 	"reflect"
 )
+
+/** Function astPrint(indent int, n interface{})
+  * Parameters:
+  *   int indent, interface{} n
+  * Return values:
+  *   Void
+  * Behavior:
+  *   Some type of debug printing (DOCUMENTATION TODO)
+  */
 func astPrint(indent int, n interface{}) {
 	for i := 0; i < indent; i++ {
 		fmt.Print(" ")
@@ -11,6 +20,16 @@ func astPrint(indent int, n interface{}) {
 	fmt.Println(reflect.TypeOf(n))
 }
 
+/** Function (ast ProgramAst) Print()
+  * Receiver:
+  *   ast ProgramAst (./asm6502.y)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   Some type of debug printing (DOCUMENTATION TODO)
+  */
 func (ast ProgramAst) Print() {
 	for e := ast.List.Front(); e != nil; e = e.Next() {
 		astPrint(0, e.Value)

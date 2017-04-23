@@ -1,4 +1,6 @@
 * Write comprehensive documentation for existing code
+* Automated testing for GO?
+* Update README if needed
 
 * disassembler: detect the pacman-style jump table. (another example in nestest.nes)
 * make SMB1 work
