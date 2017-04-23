@@ -23,6 +23,16 @@ type Disassembly struct {
 	jumpTables map[int]bool
 }
 
+/** Function (d *Disassembly) elemAsByte(elem *list.Element) (byte, error)
+  * Receiver:
+  *   d *Disassembly (./disassembly.go)
+  * Parameters:
+  *   list.Element ptr elem
+  * Return values:
+  *   (byte, error)
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (d *Disassembly) elemAsByte(elem *list.Element) (byte, error) {
 	if elem == nil {
 		return 0, errors.New("not enough bytes for byte")
@@ -42,6 +52,16 @@ func (d *Disassembly) elemAsByte(elem *list.Element) (byte, error) {
 	return b, nil
 }
 
+/** Function (d *Disassembly) elemAsWord(elem *list.Element) (unit16, error)
+  * Receiver:
+  *   d *Disassembly (./disassembly.go)
+  * Parameters:
+  *   list.Element ptr elem
+  * Return values:
+  *   (uint16, error)
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (d *Disassembly) elemAsWord(elem *list.Element) (uint16, error) {
 	if elem == nil {
 		return 0, errors.New("not enough bytes for word")
@@ -63,6 +83,16 @@ func (d *Disassembly) elemAsWord(elem *list.Element) (uint16, error) {
 	return binary.LittleEndian.Uint16([]byte{b1, b2}), nil
 }
 
+/** Function (p *Program) getLabelAt(addr int, name string) (string, error)
+  * Receiver:
+  *   p *Program (./assembly.go)
+  * Parameters:
+  *   int addr, string name
+  * Return values:
+  *   (string, error)
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (p *Program) getLabelAt(addr int, name string) (string, error) {
 	elem := p.elemAtAddr(addr)
 	if elem == nil {
@@ -87,12 +117,32 @@ func (p *Program) getLabelAt(addr int, name string) (string, error) {
 	return i.LabelName, nil
 }
 
+/** Function (d *Disassembly) removeElemAt(addr int)
+  * Receiver:
+  *   d *Disassembly (./disassembly.go)
+  * Parameters:
+  *   int addr
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (d *Disassembly) removeElemAt(addr int) {
 	elem := d.prog.elemAtAddr(addr)
 	d.prog.List.Remove(elem)
 	delete(d.prog.Offsets, addr)
 }
 
+/** Function (d *Disassembly) isJumpTable(addr int) bool
+  * Receiver:
+  *   d *Disassembly (./disassembly.go)
+  * Parameters:
+  *   int addr
+  * Return values:
+  *   bool isJmpTable
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (d *Disassembly) isJumpTable(addr int) bool {
 	isJmpTable, ok := d.jumpTables[addr]
 	if ok {
@@ -103,6 +153,16 @@ func (d *Disassembly) isJumpTable(addr int) bool {
 	return isJmpTable
 }
 
+/** Function (d *Disassembly) detectJumpTable(addr int) bool
+  * Receiver:
+  *   d *Disassembly (./disassembly.go)
+  * Parameters:
+  *   int addr
+  * Return values:
+  *   bool
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (d *Disassembly) detectJumpTable(addr int) bool {
 	const (
 		expectAsl = iota
@@ -262,6 +322,20 @@ func (d *Disassembly) detectJumpTable(addr int) bool {
 	return false
 }
 
+/** Function (d *Disassembly) markAsInstruction(addr int) error
+  * Receiver:
+  *   d *Disassembly (./disassembly.go)
+  * Parameters:
+  *   int addr
+  * Return values:
+  *   error
+  *
+  *   OR
+  *
+  *   nil
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (d *Disassembly) markAsInstruction(addr int) error {
 	if addr < 0x8000 {
 		// non-ROM address. nothing we can do
@@ -474,6 +548,16 @@ func (d *Disassembly) markAsInstruction(addr int) error {
 	return nil
 }
 
+/** Function (d *Disassembly) ToProgram() *Program
+  * Receiver:
+  *   d *Disassembly (./disassembly.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   ptr Program
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (d *Disassembly) ToProgram() *Program {
 	// add the org statement
 	orgStatement := new(OrgPseudoOp)
@@ -502,6 +586,16 @@ func (d *Disassembly) readAllAsData() {
 	}
 }
 
+/** Function (p *Program) elemAtAddr(addr int) *list.Element
+  * Receiver:
+  *   p *Program (./assembly.go)
+  * Parameters:
+  *   int addr
+  * Return values:
+  *   ptr list.Element
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (p *Program) elemAtAddr(addr int) *list.Element {
 	elem, ok := p.Offsets[addr]
 	if ok {
@@ -514,6 +608,20 @@ func (p *Program) elemAtAddr(addr int) *list.Element {
 	return nil
 }
 
+/** Function (d *Disassembly) markAsDataWordLabel(addr int, suggestedName string) error
+  * Receiver:
+  *   d *Disassembly (./disassembly.go)
+  * Parameters:
+  *   int addr, string suggestedName
+  * Return values:
+  *   error
+  *
+  *   OR
+  *
+  *   nil
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (d *Disassembly) markAsDataWordLabel(addr int, suggestedName string) error {
 	elem1 := d.prog.elemAtAddr(addr)
 	elem2 := elem1.Next()
@@ -567,6 +675,16 @@ func (d *Disassembly) markAsDataWordLabel(addr int, suggestedName string) error 
 	return nil
 }
 
+/** Function (d *Disassembly) collapseDataStatements()
+  * Receiver:
+  *   d *Disassembly (./disassembly.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (d *Disassembly) collapseDataStatements() {
 	if d.prog.List.Len() < 2 {
 		return
@@ -594,6 +712,14 @@ func (d *Disassembly) collapseDataStatements() {
 	}
 }
 
+/** Function allAscii(dl *list.List) bool
+  * Parameters:
+  *   list.List ptr dl
+  * Return values:
+  *   bool
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func allAscii(dl *list.List) bool {
 	for e := dl.Front(); e != nil; e = e.Next() {
 		switch t := e.Value.(type) {
@@ -610,6 +736,14 @@ func allAscii(dl *list.List) bool {
 	return true
 }
 
+/** Function dataListToStr(dl *list.List) bool
+  * Parameters:
+  *   list.List ptr dl
+  * Return values:
+  *   string
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func dataListToStr(dl *list.List) string {
 	str := ""
 	for e := dl.Front(); e != nil; e = e.Next() {
@@ -634,6 +768,16 @@ type orgIdentifier struct {
 	dis           *Disassembly
 }
 
+/** Function (oi *orgIdentifier) stop(e *list.Element)
+  * Receiver:
+  *   oi *orgIdentifier (./disassembly.go)
+  * Parameters:
+  *   list.Element ptr e
+  * Return values:
+  *   void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (oi *orgIdentifier) stop(e *list.Element) {
 	if oi.repeatCount > orgMinRepeatAmt {
 		firstOffset := oi.firstElem.Value.(*DataStatement).Offset
@@ -650,12 +794,32 @@ func (oi *orgIdentifier) stop(e *list.Element) {
 	oi.repeatCount = 0
 }
 
+/** Function (oi *orgIdentifier) start(e *list.Element, b byte)
+  * Receiver:
+  *   oi *orgIdentifier (./disassembly.go)
+  * Parameters:
+  *   list.Element ptr e, byte b
+  * Return values:
+  *   void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (oi *orgIdentifier) start(e *list.Element, b byte) {
 	oi.firstElem = e
 	oi.repeatingByte = b
 	oi.repeatCount = 1
 }
 
+/** Function (oi *orgIdentifier) gotByte(e *list.Element, b byte)
+  * Receiver:
+  *   oi *orgIdentifier (./disassembly.go)
+  * Parameters:
+  *   list.Element ptr e, byte b
+  * Return values:
+  *   void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (oi *orgIdentifier) gotByte(e *list.Element, b byte) {
 	if oi.repeatCount == 0 {
 		oi.start(e, b)
@@ -667,6 +831,16 @@ func (oi *orgIdentifier) gotByte(e *list.Element, b byte) {
 	}
 }
 
+/** Function (d *Disassembly) identifyOrgs()
+  * Receiver:
+  *   d *Disassembly (./disassembly.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (d *Disassembly) identifyOrgs() {
 	// if a byte repeats enough, use an org statement
 	if d.prog.List.Len() < orgMinRepeatAmt {
@@ -689,6 +863,16 @@ func (d *Disassembly) identifyOrgs() {
 	}
 }
 
+/** Function (d *Disassembly) groupAsciiStrings()
+  * Receiver:
+  *   d *Disassembly (./disassembly.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (d *Disassembly) groupAsciiStrings() {
 	const threshold = 5
 	if d.prog.List.Len() < threshold {
@@ -723,6 +907,16 @@ func (d *Disassembly) groupAsciiStrings() {
 	}
 }
 
+/** Function (p *Program) elemLabelStmt(elem *list.Element) *LabelStatement
+  * Receiver:
+  *   p *Program (./assembly.go)
+  * Parameters:
+  *   list.Element ptr elem
+  * Return values:
+  *   ptr LabelStatement
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (p *Program) elemLabelStmt(elem *list.Element) *LabelStatement {
 	if elem == nil {
 		return nil
@@ -741,6 +935,16 @@ func (p *Program) elemLabelStmt(elem *list.Element) *LabelStatement {
 	return nil
 }
 
+/** Function (d *Disassembly) resolveDynJumpCases()
+  * Receiver:
+  *   d *Disassembly (./disassembly.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   Void
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (d *Disassembly) resolveDynJumpCases() {
 	// this function is recursive, since calling markAsDataWordLabel can
 	// append more dynJumps
@@ -770,6 +974,16 @@ func (d *Disassembly) resolveDynJumpCases() {
 	d.resolveDynJumpCases()
 }
 
+/** Function (r *Rom) Disassemble() (*Program, error)
+  * Receiver:
+  *   r *Rom (./rom.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   (ptr Program, error)
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (r *Rom) Disassemble() (*Program, error) {
 	if len(r.PrgRom) != 1 && len(r.PrgRom) != 2 {
 		return nil, errors.New("only 1 or 2 prg rom banks supported")
@@ -806,6 +1020,14 @@ func (r *Rom) Disassemble() (*Program, error) {
 	return p, nil
 }
 
+/** Function Disassemble(reader io.Reader) (*Program, error)
+  * Parameters:
+  *   io.Reader reader
+  * Return values:
+  *   (ptr Program, error)
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func Disassemble(reader io.Reader) (*Program, error) {
 	r := new(Rom)
 	bank, err := ioutil.ReadAll(reader)
@@ -816,6 +1038,14 @@ func Disassemble(reader io.Reader) (*Program, error) {
 	return r.Disassemble()
 }
 
+/** Function Disassemble(reader io.Reader) (*Program, error)
+  * Parameters:
+  *   string filename
+  * Return values:
+  *   (ptr Program, error)
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func DisassembleFile(filename string) (*Program, error) {
 	fd, err := os.Open(filename)
 	if err != nil {
@@ -834,6 +1064,16 @@ func DisassembleFile(filename string) (*Program, error) {
 	return p, nil
 }
 
+/** Function (i *Instruction) Render() string
+  * Receiver:
+  *  i *Instruction (./assembly.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   string
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (i *Instruction) Render() string {
 	switch i.Type {
 	case ImmediateInstruction:
@@ -865,6 +1105,16 @@ func (i *Instruction) Render() string {
 	panic("unexpected Instruction Type")
 }
 
+/** Function (i *OrgPseudoOp) Render() string
+  * Receiver:
+  *  i *OrgPseudoOp (./assembly.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   string
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (i *OrgPseudoOp) Render() string {
 	if i.Fill == 0xff {
 		return fmt.Sprintf(".org $%04x", i.Value)
@@ -872,6 +1122,16 @@ func (i *OrgPseudoOp) Render() string {
 	return fmt.Sprintf(".org $%04x, $%02x", i.Value, i.Fill)
 }
 
+/** Function (s *DataStatement) Render() string
+  * Receiver:
+  *  s *DataStatement (./assembly.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   string
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (s *DataStatement) Render() string {
 	buf := new(bytes.Buffer)
 	switch s.Type {
@@ -905,10 +1165,30 @@ func (s *DataStatement) Render() string {
 	return buf.String()
 }
 
+/** Function (s *LabelStatement) Render() string
+  * Receiver:
+  *  s *LabelStatement (./assembly.go)
+  * Parameters:
+  *   Void
+  * Return values:
+  *   string
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (s *LabelStatement) Render() string {
 	return fmt.Sprintf("%s:", s.LabelName)
 }
 
+/** Function (p *Program) WriteSource(writer io.Writer) (err error)
+  * Receiver:
+  *  p *Program (./assembly.go)
+  * Parameters:
+  *   io.Writer writer
+  * Return values:
+  *   error err
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (p *Program) WriteSource(writer io.Writer) (err error) {
 	w := bufio.NewWriter(writer)
 
@@ -937,6 +1217,16 @@ func (p *Program) WriteSource(writer io.Writer) (err error) {
 	return
 }
 
+/** Function (p *Program) WriteSourceFile(filename string) error
+  * Receiver:
+  *  p *Program (./assembly.go)
+  * Parameters:
+  *   string filename
+  * Return values:
+  *   error
+  * Behavior:
+  *   (DOCUMENTATION TODO)
+  */
 func (p *Program) WriteSourceFile(filename string) error {
 	fd, err := os.Create(filename)
 	if err != nil {
